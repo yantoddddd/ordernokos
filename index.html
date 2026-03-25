@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚀 Auto Order Noko Yanto - JasaOTP.ID</title>
+    <title>🚀 Noko Yanto - JasaOTP.ID FIXED</title>
     <style>
         * {margin:0;padding:0;box-sizing:border-box;}
         body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px;}
@@ -13,11 +13,11 @@
         .content{padding:30px;}
         .form-group{margin-bottom:20px;}
         label{display:block;margin-bottom:8px;font-weight:600;color:#333;}
-        select{width:100%;padding:12px;border:2px solid #e1e5e9;border-radius:10px;font-size:16px;transition:all 0.3s;}
-        select:focus{outline:none;border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,0.1);}
+        select, input{width:100%;padding:12px;border:2px solid #e1e5e9;border-radius:10px;font-size:16px;transition:all 0.3s;}
+        select:focus,input:focus{outline:none;border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,0.1);}
         .btn{width:100%;padding:15px;background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;border-radius:10px;font-size:18px;font-weight:600;cursor:pointer;transition:all 0.3s;margin-bottom:20px;}
         .btn:hover{transform:translateY(-2px);box-shadow:0 10px 25px rgba(102,126,234,0.4);}
-        .btn:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
+        .btn:disabled{opacity:0.6;cursor:not-allowed;}
         .status{padding:15px;border-radius:10px;margin-bottom:20px;font-weight:500;}
         .status.loading{background:#fff3cd;border:1px solid #ffeaa7;color:#856404;}
         .status.success{background:#d4edda;border:1px solid #c3e6cb;color:#155724;}
@@ -25,37 +25,55 @@
         .result-box{background:#f8f9fa;border:2px solid #e9ecef;border-radius:10px;padding:20px;margin-top:20px;display:none;}
         .number{font-size:24px;font-weight:bold;color:#667eea;word-break:break-all;margin:10px 0;}
         .otp{font-size:28px;font-weight:bold;color:#ff6b6b;background:#ffeaa7;padding:15px;border-radius:10px;text-align:center;margin-top:15px;}
-        .auto-refresh{text-align:center;color:#666;font-size:14px;margin-top:10px;}
+        .debug{padding:10px;background:#e3f2fd;border-radius:5px;font-size:12px;margin-bottom:10px;}
         .balance{background:linear-gradient(135deg,#a8edea,#fed6e3);padding:15px;border-radius:10px;text-align:center;margin-bottom:20px;}
-        @media(max-width:768px){.header h1{font-size:2em;}.content{padding:20px;}}
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🚀 Noko Yanto Auto Order</h1>
-            <p><strong>api.jasaotp.id ✅ READY</strong></p>
+            <h1>🚀 Noko Yanto FIXED</h1>
+            <p><strong>api.jasaotp.id | ID: 6 (Indonesia)</strong></p>
         </div>
         <div class="content">
+            <div class="debug" id="debug"></div>
+            
             <div id="balanceBox" class="balance" style="display:none;">
                 <strong>💰 Saldo: Rp <span id="saldo">0</span></strong>
             </div>
+            
             <div id="status" class="status" style="display:none;"></div>
             
             <div class="form-group">
                 <label>🌍 Negara:</label>
-                <select id="negara"><option value="">Loading...</option></select>
-            </div>
-            <div class="form-group">
-                <label>📱 Operator:</label>
-                <select id="operator" disabled><option value="">Pilih negara</option></select>
-            </div>
-            <div class="form-group">
-                <label>🎯 Layanan:</label>
-                <select id="layanan" disabled><option value="">Pilih negara</option></select>
+                <select id="negara">
+                    <option value="6">🇮🇩 Indonesia (ID: 6)</option>
+                </select>
             </div>
             
-            <button class="btn" id="orderBtn" onclick="buatOrder()">🚀 BUAT ORDER</button>
+            <div class="form-group">
+                <label>📱 Operator:</label>
+                <select id="operator">
+                    <option value="any">any</option>
+                    <option value="indosat">indosat</option>
+                    <option value="telkomsel">telkomsel</option>
+                    <option value="axis">axis</option>
+                    <option value="three">three</option>
+                    <option value="smartfren">smartfren</option>
+                    <option value="byu">byu</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>🎯 Layanan:</label>
+                <select id="layanan">
+                    <option value="wa">whatsapp (3000)</option>
+                    <option value="fb">facebook (4000)</option>
+                </select>
+            </div>
+            
+            <button class="btn" onclick="buatOrder()">🚀 BUAT ORDER WA</button>
+            <button class="btn" onclick="buatOrderFB()" style="background:linear-gradient(135deg,#ff6b6b,#ee5a24);">📘 BUAT ORDER FB</button>
             
             <div id="resultBox" class="result-box">
                 <div style="text-align:center;">
@@ -76,10 +94,29 @@
         let currentOrderId = null;
         let autoCheckInterval = null;
 
-        window.onload = async function() {
+        // Test API langsung
+        window.onload = async () => {
+            debug('🔄 Testing API...');
+            await testAPI();
             await loadSaldo();
-            await loadNegara();
         };
+
+        async function testAPI() {
+            try {
+                debug('Testing balance...');
+                const res = await fetch(`${API_BASE}balance.php?api_key=${API_KEY}`);
+                const data = await res.json();
+                debug(`✅ Balance OK: ${data.success ? 'Saldo ' + data.data.saldo : 'Error'}`);
+                
+                debug('Testing Indonesia operator...');
+                const opRes = await fetch(`${API_BASE}operator.php?negara=6`);
+                const opData = await opRes.json();
+                debug(`✅ Operator OK: ${opData.success ? opData.data['6'].length + ' operators' : 'Error'}`);
+                
+            } catch(e) {
+                debug('❌ API Error: ' + e.message);
+            }
+        }
 
         async function loadSaldo() {
             try {
@@ -88,84 +125,26 @@
                 if (data.success) {
                     document.getElementById('saldo').textContent = data.data.saldo.toLocaleString();
                     document.getElementById('balanceBox').style.display = 'block';
+                    debug(`💰 Saldo: Rp ${data.data.saldo.toLocaleString()}`);
                 }
-            } catch(e) {console.error('Saldo error:', e);}
-        }
-
-        async function loadNegara() {
-            try {
-                const res = await fetch(`${API_BASE}negara.php`);
-                const data = await res.json();
-                const select = document.getElementById('negara');
-                select.innerHTML = '<option value="">Pilih Negara</option>';
-                data.data.forEach(n => {
-                    const opt = document.createElement('option');
-                    opt.value = n.id_negara;
-                    opt.textContent = n.nama_negara;
-                    select.appendChild(opt);
-                });
-                select.onchange = () => {
-                    loadOperator(select.value);
-                    loadLayanan(select.value);
-                };
             } catch(e) {
-                console.error('Negara error:', e);
-                document.getElementById('negara').innerHTML = '<option>API Error</option>';
+                debug('Saldo error: ' + e.message);
             }
         }
 
-        async function loadOperator(id) {
-            if (!id) return document.getElementById('operator').innerHTML = '<option>Pilih negara</option>';
-            try {
-                const res = await fetch(`${API_BASE}operator.php?negara=${id}`);
-                const data = await res.json();
-                const select = document.getElementById('operator');
-                select.innerHTML = '<option value="">Pilih Operator</option>';
-                data.data[id].forEach(op => {
-                    const opt = document.createElement('option');
-                    opt.value = op;
-                    opt.textContent = op;
-                    select.appendChild(opt);
-                });
-                select.disabled = false;
-            } catch(e) {console.error('Operator error:', e);}
-        }
-
-        async function loadLayanan(id) {
-            if (!id) return document.getElementById('layanan').innerHTML = '<option>Pilih negara</option>';
-            try {
-                const res = await fetch(`${API_BASE}layanan.php?negara=${id}`);
-                const data = await res.json();
-                const select = document.getElementById('layanan');
-                select.innerHTML = '<option value="">Pilih Layanan</option>';
-                const layanan = data[id];
-                Object.keys(layanan).forEach(k => {
-                    const l = layanan[k];
-                    const opt = document.createElement('option');
-                    opt.value = k;
-                    opt.textContent = `${l.layanan} (${l.harga} - Stok: ${l.stok})`;
-                    select.appendChild(opt);
-                });
-                select.disabled = false;
-            } catch(e) {console.error('Layanan error:', e);}
-        }
-
-        async function buatOrder() {
-            const negara = document.getElementById('negara').value;
-            const operator = document.getElementById('operator').value;
-            const layanan = document.getElementById('layanan').value;
-            
-            if (!negara || !operator || !layanan) 
-                return showStatus('error', '⚠️ Lengkapi form!');
+        async function buatOrder(layanan = 'wa') {
+            const negara = 6;
+            const operator = document.getElementById('operator').value || 'any';
             
             const btn = document.getElementById('orderBtn');
             btn.disabled = true;
             btn.textContent = '⏳ Order...';
-            showStatus('loading', '🔄 Membuat order...');
+            showStatus('loading', `🔄 Order ${layanan.toUpperCase()}...`);
             
             try {
                 const res = await fetch(`${API_BASE}order.php?api_key=${API_KEY}&negara=${negara}&layanan=${layanan}&operator=${operator}`);
                 const data = await res.json();
+                console.log('Order response:', data);
                 
                 if (data.success) {
                     currentOrderId = data.data.order_id;
@@ -174,18 +153,24 @@
                     document.getElementById('resultBox').style.display = 'block';
                     document.getElementById('cekOtpBtn').disabled = false;
                     document.getElementById('cancelBtn').disabled = false;
-                    showStatus('success', '✅ Order berhasil!');
+                    showStatus('success', `✅ Order ${layanan.toUpperCase()} berhasil!`);
+                    debug(`✅ Order OK: ${data.data.number}`);
                     startAutoCheck();
                 } else {
-                    showStatus('error', `❌ ${data.message}`);
+                    showStatus('error', `❌ ${data.message || 'Order gagal'}`);
+                    debug(`❌ Order fail: ${data.message}`);
                 }
             } catch(e) {
                 showStatus('error', '❌ Network error!');
+                debug('❌ Network: ' + e.message);
             } finally {
                 btn.disabled = false;
-                btn.textContent = '🚀 BUAT ORDER';
-                setTimeout(()=>document.getElementById('status').style.display='none', 3000);
+                btn.textContent = '🚀 BUAT ORDER WA';
             }
+        }
+
+        function buatOrderFB() {
+            buatOrder('fb');
         }
 
         async function cekOTP() {
@@ -193,33 +178,41 @@
             try {
                 const res = await fetch(`${API_BASE}sms.php?api_key=${API_KEY}&id=${currentOrderId}`);
                 const data = await res.json();
+                console.log('OTP response:', data);
+                
                 if (data.success && data.data.otp) {
                     document.getElementById('otpResult').textContent = data.data.otp;
                     document.getElementById('otpResult').style.display = 'block';
                     showStatus('success', `✅ OTP: ${data.data.otp}`);
+                    debug(`✅ OTP: ${data.data.otp}`);
                     stopAutoCheck();
                 } else {
                     showStatus('loading', '⏳ Menunggu OTP...');
                 }
-            } catch(e) {console.error('OTP error:', e);}
+            } catch(e) {
+                console.error('OTP error:', e);
+            }
         }
 
         async function cancelOrder() {
-            if (!currentOrderId || !confirm('Cancel order?')) return;
+            if (!currentOrderId || !confirm('Yakin cancel?')) return;
             try {
                 const res = await fetch(`${API_BASE}cancel.php?api_key=${API_KEY}&id=${currentOrderId}`);
                 const data = await res.json();
                 if (data.success) {
-                    showStatus('success', '✅ Dibatalkan & refund!');
+                    showStatus('success', '✅ Cancel OK + Refund!');
+                    debug('✅ Cancel OK');
                     resetForm();
                 }
-            } catch(e) {console.error('Cancel error:', e);}
+            } catch(e) {
+                debug('Cancel error: ' + e.message);
+            }
         }
 
         function startAutoCheck() {
             let i = 0;
             document.getElementById('autoRefresh').textContent = '🔄 Auto check...';
-            autoCheckInterval = setInterval(()=> {
+            autoCheckInterval = setInterval(() => {
                 i++;
                 document.getElementById('autoRefresh').textContent = `🔄 Check ${i}`;
                 cekOTP();
@@ -227,10 +220,7 @@
         }
 
         function stopAutoCheck() {
-            if (autoCheckInterval) {
-                clearInterval(autoCheckInterval);
-                document.getElementById('autoRefresh').textContent = '✅ Selesai!';
-            }
+            if (autoCheckInterval) clearInterval(autoCheckInterval);
         }
 
         function resetForm() {
@@ -245,6 +235,13 @@
             el.textContent = msg;
             el.style.display = 'block';
         }
-    </script>
+
+        function debug(msg) {
+            const el = document.getElementById('debug');
+            el.innerHTML += msg + '<br>';
+            el.scrollTop = el.scrollHeight;
+            console.log(msg);
+        }
+    </style>
 </body>
 </html>
