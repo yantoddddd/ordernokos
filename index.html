@@ -159,7 +159,7 @@ async function send(){
   headers:{'Content-Type':'application/json'},
   body:JSON.stringify({
    chat_id:CHAT_ID,
-   text:`ID ${ticket}\n${t}`
+   text:````ID : ${ticket}\n${t}````
   })
  });
 
@@ -168,7 +168,7 @@ async function send(){
 
 // typing fake
 function typingOn(){
- typing.innerText="admin sedang mengetik...";
+ typing.innerText="Typing..";
 }
 function typingOff(){
  typing.innerText="";
