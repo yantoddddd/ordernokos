@@ -1,247 +1,157 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚀 Noko Yanto - JasaOTP.ID FIXED</title>
-    <style>
-        * {margin:0;padding:0;box-sizing:border-box;}
-        body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px;}
-        .container{max-width:800px;margin:0 auto;background:white;border-radius:20px;box-shadow:0 20px 40px rgba(0,0,0,0.1);overflow:hidden;}
-        .header{background:linear-gradient(135deg,#ff6b6b,#feca57);color:white;padding:30px;text-align:center;}
-        .header h1{font-size:2.5em;margin-bottom:10px;}
-        .content{padding:30px;}
-        .form-group{margin-bottom:20px;}
-        label{display:block;margin-bottom:8px;font-weight:600;color:#333;}
-        select, input{width:100%;padding:12px;border:2px solid #e1e5e9;border-radius:10px;font-size:16px;transition:all 0.3s;}
-        select:focus,input:focus{outline:none;border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,0.1);}
-        .btn{width:100%;padding:15px;background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;border-radius:10px;font-size:18px;font-weight:600;cursor:pointer;transition:all 0.3s;margin-bottom:20px;}
-        .btn:hover{transform:translateY(-2px);box-shadow:0 10px 25px rgba(102,126,234,0.4);}
-        .btn:disabled{opacity:0.6;cursor:not-allowed;}
-        .status{padding:15px;border-radius:10px;margin-bottom:20px;font-weight:500;}
-        .status.loading{background:#fff3cd;border:1px solid #ffeaa7;color:#856404;}
-        .status.success{background:#d4edda;border:1px solid #c3e6cb;color:#155724;}
-        .status.error{background:#f8d7da;border:1px solid #f5c6cb;color:#721c24;}
-        .result-box{background:#f8f9fa;border:2px solid #e9ecef;border-radius:10px;padding:20px;margin-top:20px;display:none;}
-        .number{font-size:24px;font-weight:bold;color:#667eea;word-break:break-all;margin:10px 0;}
-        .otp{font-size:28px;font-weight:bold;color:#ff6b6b;background:#ffeaa7;padding:15px;border-radius:10px;text-align:center;margin-top:15px;}
-        .debug{padding:10px;background:#e3f2fd;border-radius:5px;font-size:12px;margin-bottom:10px;}
-        .balance{background:linear-gradient(135deg,#a8edea,#fed6e3);padding:15px;border-radius:10px;text-align:center;margin-bottom:20px;}
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<title>Noko Yanto</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif}
+body{background:#667eea;padding:20px}
+.box{max-width:500px;margin:auto;background:#fff;border-radius:15px;padding:25px;box-shadow:0 10px 30px rgba(0,0,0,0.2)}
+h1{text-align:center;color:#ff6b6b;margin-bottom:20px;font-size:24px}
+select,.btn{width:100%;padding:12px;margin:10px 0;border-radius:8px;border:1px solid #ddd;font-size:16px}
+.btn{background:#667eea;color:white;border:none;cursor:pointer;font-weight:bold;font-size:16px}
+.btn:hover{background:#5a67d8}
+.btn:disabled{background:#ccc;cursor:not-allowed}
+.num{font-size:22px;color:#667eea;font-weight:bold;text-align:center;margin:15px 0;padding:15px;background:#f0f8ff;border-radius:8px}
+.otp{font-size:30px;color:#e53e3e;background:#fed7d7;padding:20px;border-radius:10px;text-align:center;margin:15px 0;font-weight:bold}
+.status{padding:12px;border-radius:8px;margin:10px 0;font-weight:bold}
+.ok{background:#c6f6d5;color:#22543d;border:1px solid #9ae6b4}
+.error{background:#fed7d7;color:#742a2a;border:1px solid #fc8181}
+.wait{background:#fef5e7;color:#744210;border:1px solid #f6ad55}
+.balance{background:#bee3f8;padding:12px;border-radius:8px;text-align:center;margin-bottom:15px}
+#result{display:none}
+</style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🚀 Noko Yanto FIXED</h1>
-            <p><strong>api.jasaotp.id | ID: 6 (Indonesia)</strong></p>
-        </div>
-        <div class="content">
-            <div class="debug" id="debug"></div>
-            
-            <div id="balanceBox" class="balance" style="display:none;">
-                <strong>💰 Saldo: Rp <span id="saldo">0</span></strong>
-            </div>
-            
-            <div id="status" class="status" style="display:none;"></div>
-            
-            <div class="form-group">
-                <label>🌍 Negara:</label>
-                <select id="negara">
-                    <option value="6">🇮🇩 Indonesia (ID: 6)</option>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label>📱 Operator:</label>
-                <select id="operator">
-                    <option value="any">any</option>
-                    <option value="indosat">indosat</option>
-                    <option value="telkomsel">telkomsel</option>
-                    <option value="axis">axis</option>
-                    <option value="three">three</option>
-                    <option value="smartfren">smartfren</option>
-                    <option value="byu">byu</option>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label>🎯 Layanan:</label>
-                <select id="layanan">
-                    <option value="wa">whatsapp (3000)</option>
-                    <option value="fb">facebook (4000)</option>
-                </select>
-            </div>
-            
-            <button class="btn" onclick="buatOrder()">🚀 BUAT ORDER WA</button>
-            <button class="btn" onclick="buatOrderFB()" style="background:linear-gradient(135deg,#ff6b6b,#ee5a24);">📘 BUAT ORDER FB</button>
-            
-            <div id="resultBox" class="result-box">
-                <div style="text-align:center;">
-                    <div class="number" id="phoneNumber"></div>
-                    <div id="orderId" style="color:#666;margin:10px 0;"></div>
-                    <button class="btn" onclick="cekOTP()" id="cekOtpBtn" style="width:auto;padding:10px 20px;">📱 CEK OTP</button>
-                    <button class="btn" onclick="cancelOrder()" id="cancelBtn" style="width:auto;padding:10px 20px;background:#ff6b6b;">❌ CANCEL</button>
-                </div>
-                <div id="otpResult" class="otp" style="display:none;"></div>
-                <div class="auto-refresh" id="autoRefresh"></div>
-            </div>
-        </div>
-    </div>
+<div class="box">
+<h1>🚀 Noko Yanto</h1>
+<div id="balance" class="balance" style="display:none">Saldo: <span id="saldo">0</span></div>
+<div id="status" class="status" style="display:none"></div>
 
-    <script>
-        const API_BASE = 'https://api.jasaotp.id/v1/';
-        const API_KEY = 'd2c16800b8aba6bafd60499727a16fa9';
-        let currentOrderId = null;
-        let autoCheckInterval = null;
+<select id="operator">
+<option value="any">📶 Any</option>
+<option value="telkomsel">📶 Telkomsel</option>
+<option value="indosat">📶 Indosat</option>
+<option value="axis">📶 Axis</option>
+<option value="three">📶 Three</option>
+</select>
 
-        // Test API langsung
-        window.onload = async () => {
-            debug('🔄 Testing API...');
-            await testAPI();
-            await loadSaldo();
-        };
+<button class="btn" onclick="order('wa')">🚀 ORDER WA (Rp3000)</button>
+<button class="btn" onclick="order('fb')">📘 ORDER FB (Rp4000)</button>
 
-        async function testAPI() {
-            try {
-                debug('Testing balance...');
-                const res = await fetch(`${API_BASE}balance.php?api_key=${API_KEY}`);
-                const data = await res.json();
-                debug(`✅ Balance OK: ${data.success ? 'Saldo ' + data.data.saldo : 'Error'}`);
-                
-                debug('Testing Indonesia operator...');
-                const opRes = await fetch(`${API_BASE}operator.php?negara=6`);
-                const opData = await opRes.json();
-                debug(`✅ Operator OK: ${opData.success ? opData.data['6'].length + ' operators' : 'Error'}`);
-                
-            } catch(e) {
-                debug('❌ API Error: ' + e.message);
-            }
-        }
+<div id="result">
+<div class="num" id="phone">-</div>
+<div id="orderid" style="text-align:center;color:#666;font-size:14px;margin:10px 0">Order ID: -</div>
+<button class="btn" onclick="checkOTP()" id="checkbtn" disabled>📱 CEK OTP</button>
+<button class="btn" onclick="cancel()" id="cancelbtn" disabled style="background:#e53e3e">❌ CANCEL</button>
+<div id="otp" class="otp" style="display:none">-</div>
+<div id="autorefresh" style="text-align:center;color:#666;font-size:12px"></div>
+</div>
+</div>
 
-        async function loadSaldo() {
-            try {
-                const res = await fetch(`${API_BASE}balance.php?api_key=${API_KEY}`);
-                const data = await res.json();
-                if (data.success) {
-                    document.getElementById('saldo').textContent = data.data.saldo.toLocaleString();
-                    document.getElementById('balanceBox').style.display = 'block';
-                    debug(`💰 Saldo: Rp ${data.data.saldo.toLocaleString()}`);
-                }
-            } catch(e) {
-                debug('Saldo error: ' + e.message);
-            }
-        }
+<script>
+const API='https://api.jasaotp.id/v1/';
+const KEY='d2c16800b8aba6bafd60499727a16fa9';
+let orderid=null;
+let interval=null;
 
-        async function buatOrder(layanan = 'wa') {
-            const negara = 6;
-            const operator = document.getElementById('operator').value || 'any';
-            
-            const btn = document.getElementById('orderBtn');
-            btn.disabled = true;
-            btn.textContent = '⏳ Order...';
-            showStatus('loading', `🔄 Order ${layanan.toUpperCase()}...`);
-            
-            try {
-                const res = await fetch(`${API_BASE}order.php?api_key=${API_KEY}&negara=${negara}&layanan=${layanan}&operator=${operator}`);
-                const data = await res.json();
-                console.log('Order response:', data);
-                
-                if (data.success) {
-                    currentOrderId = data.data.order_id;
-                    document.getElementById('phoneNumber').textContent = data.data.number;
-                    document.getElementById('orderId').textContent = `Order ID: ${currentOrderId}`;
-                    document.getElementById('resultBox').style.display = 'block';
-                    document.getElementById('cekOtpBtn').disabled = false;
-                    document.getElementById('cancelBtn').disabled = false;
-                    showStatus('success', `✅ Order ${layanan.toUpperCase()} berhasil!`);
-                    debug(`✅ Order OK: ${data.data.number}`);
-                    startAutoCheck();
-                } else {
-                    showStatus('error', `❌ ${data.message || 'Order gagal'}`);
-                    debug(`❌ Order fail: ${data.message}`);
-                }
-            } catch(e) {
-                showStatus('error', '❌ Network error!');
-                debug('❌ Network: ' + e.message);
-            } finally {
-                btn.disabled = false;
-                btn.textContent = '🚀 BUAT ORDER WA';
-            }
-        }
+async function status(t,m){
+ document.getElementById('status').innerHTML=m;
+ document.getElementById('status').className='status '+t;
+ document.getElementById('status').style.display='block';
+ setTimeout(()=>document.getElementById('status').style.display='none',2500);
+}
 
-        function buatOrderFB() {
-            buatOrder('fb');
-        }
+async function saldo(){
+ try{
+  let r=await fetch(API+'balance.php?api_key='+KEY);
+  let d=await r.json();
+  if(d.success){
+   document.getElementById('saldo').innerText=d.data.saldo;
+   document.getElementById('balance').style.display='block';
+  }
+ }catch(e){}
+}
 
-        async function cekOTP() {
-            if (!currentOrderId) return;
-            try {
-                const res = await fetch(`${API_BASE}sms.php?api_key=${API_KEY}&id=${currentOrderId}`);
-                const data = await res.json();
-                console.log('OTP response:', data);
-                
-                if (data.success && data.data.otp) {
-                    document.getElementById('otpResult').textContent = data.data.otp;
-                    document.getElementById('otpResult').style.display = 'block';
-                    showStatus('success', `✅ OTP: ${data.data.otp}`);
-                    debug(`✅ OTP: ${data.data.otp}`);
-                    stopAutoCheck();
-                } else {
-                    showStatus('loading', '⏳ Menunggu OTP...');
-                }
-            } catch(e) {
-                console.error('OTP error:', e);
-            }
-        }
+async function order(svc){
+ let op=document.getElementById('operator').value;
+ status('wait','⏳ Order '+svc.toUpperCase()+'...');
+ 
+ try{
+  let r=await fetch(API+'order.php?api_key='+KEY+'&negara=6&layanan='+svc+'&operator='+op);
+  let d=await r.json();
+  console.log(d);
+  
+  if(d.success){
+   orderid=d.data.order_id;
+   document.getElementById('phone').innerText=d.data.number;
+   document.getElementById('orderid').innerText='Order ID: '+orderid;
+   document.getElementById('result').style.display='block';
+   document.getElementById('checkbtn').disabled=false;
+   document.getElementById('cancelbtn').disabled=false;
+   status('ok','✅ Order berhasil!');
+   autoCheck();
+  }else{
+   status('error','❌ '+d.message);
+  }
+ }catch(e){
+  status('error','❌ Error: '+e.message);
+ }
+}
 
-        async function cancelOrder() {
-            if (!currentOrderId || !confirm('Yakin cancel?')) return;
-            try {
-                const res = await fetch(`${API_BASE}cancel.php?api_key=${API_KEY}&id=${currentOrderId}`);
-                const data = await res.json();
-                if (data.success) {
-                    showStatus('success', '✅ Cancel OK + Refund!');
-                    debug('✅ Cancel OK');
-                    resetForm();
-                }
-            } catch(e) {
-                debug('Cancel error: ' + e.message);
-            }
-        }
+async function checkOTP(){
+ if(!orderid)return;
+ try{
+  let r=await fetch(API+'sms.php?api_key='+KEY+'&id='+orderid);
+  let d=await r.json();
+  console.log(d);
+  
+  if(d.success && d.data.otp){
+   document.getElementById('otp').innerText=d.data.otp;
+   document.getElementById('otp').style.display='block';
+   status('ok','✅ OTP: '+d.data.otp);
+   clearInterval(interval);
+   document.getElementById('autorefresh').innerText='✅ Auto check selesai';
+  }else{
+   status('wait','⏳ Tunggu OTP...');
+  }
+ }catch(e){
+  console.error(e);
+ }
+}
 
-        function startAutoCheck() {
-            let i = 0;
-            document.getElementById('autoRefresh').textContent = '🔄 Auto check...';
-            autoCheckInterval = setInterval(() => {
-                i++;
-                document.getElementById('autoRefresh').textContent = `🔄 Check ${i}`;
-                cekOTP();
-            }, 3000);
-        }
+async function cancel(){
+ if(!orderid || !confirm('Cancel order?'))return;
+ try{
+  let r=await fetch(API+'cancel.php?api_key='+KEY+'&id='+orderid);
+  let d=await r.json();
+  if(d.success){
+   status('ok','✅ Cancel + refund OK!');
+   reset();
+  }
+ }catch(e){}
+}
 
-        function stopAutoCheck() {
-            if (autoCheckInterval) clearInterval(autoCheckInterval);
-        }
+function autoCheck(){
+ let c=0;
+ document.getElementById('autorefresh').innerText='🔄 Auto check...';
+ interval=setInterval(()=>{
+  c++;
+  document.getElementById('autorefresh').innerText='🔄 Check '+c;
+  checkOTP();
+ },3000);
+}
 
-        function resetForm() {
-            currentOrderId = null;
-            document.getElementById('resultBox').style.display = 'none';
-            stopAutoCheck();
-        }
+function reset(){
+ orderid=null;
+ document.getElementById('result').style.display='none';
+ document.getElementById('checkbtn').disabled=true;
+ document.getElementById('cancelbtn').disabled=true;
+ if(interval)clearInterval(interval);
+}
 
-        function showStatus(type, msg) {
-            const el = document.getElementById('status');
-            el.className = `status ${type}`;
-            el.textContent = msg;
-            el.style.display = 'block';
-        }
-
-        function debug(msg) {
-            const el = document.getElementById('debug');
-            el.innerHTML += msg + '<br>';
-            el.scrollTop = el.scrollHeight;
-            console.log(msg);
-        }
-    </style>
+saldo();
+</script>
 </body>
 </html>
