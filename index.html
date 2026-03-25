@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Chat - WORKING REPLY</title>
+    <title>Live Chat - FINAL FIX</title>
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
         body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px}
@@ -17,9 +17,9 @@
         .message{margin-bottom:16px;display:flex;animation:fadeIn .4s ease-out}
         .message.user{justify-content:flex-end}
         .message.admin{justify-content:flex-start}
-        .message-content{max-width:85%;padding:14px 18px;border-radius:20px;font-size:15px;line-height:1.4}
-        .message.user .message-content{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;border-bottom-right-radius:6px;box-shadow:0 4px 12px rgba(102,126,234,.3)}
-        .message.admin .message-content{background:white;border:1px solid #e9ecef;border-bottom-left-radius:6px;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+        .message-content{max-width:85%;padding:14px 18px;border-radius:20px;font-size:15px;line-height:1.4;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+        .message.user .message-content{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;border-bottom-right-radius:6px}
+        .message.admin .message-content{background:#fff;border:1px solid #e9ecef;border-bottom-left-radius:6px}
         .message-time{font-size:11px;opacity:.7;margin-top:6px;font-weight:400}
         .chat-input-container{padding:20px;background:white;border-top:1px solid #f1f3f4}
         .chat-input-wrapper{display:flex;gap:12px;background:#f8f9fa;padding:12px 16px;border-radius:28px;border:2px solid #e9ecef}
@@ -30,7 +30,8 @@
         #sendBtn:disabled{opacity:.5;cursor:not-allowed;transform:none}
         .welcome-msg{text-align:center;color:#666;padding:40px 20px;font-size:15px;line-height:1.5}
         @keyframes fadeIn{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}
-        #debug{position:fixed;bottom:10px;right:10px;background:rgba(0,0,0,.9);color:lime;padding:10px;border-radius:8px;font-size:12px;max-width:300px;max-height:200px;overflow:auto;z-index:9999;display:none}
+        #debug{position:fixed;bottom:10px;right:10px;background:rgba(0,0,0,.9);color:#0f0;padding:12px;border-radius:8px;font-family:monospace;font-size:11px;max-width:350px;max-height:250px;overflow:auto;z-index:9999;opacity:0;transition:opacity .3s}
+        #debug.show{opacity:1}
     </style>
 </head>
 <body>
@@ -40,11 +41,11 @@
             <div class="status polling" id="connectionStatus">Menghubungkan...<span class="status-dot"></span></div>
         </div>
         <div class="chat-messages" id="chatMessages">
-            <div class="welcome-msg"><strong>Sedang menghubungkan...</strong><br>Ketik pesan untuk mulai chat</div>
+            <div class="welcome-msg"><strong>Agen online</strong><br>Ketik pesan untuk chat</div>
         </div>
         <div class="chat-input-container">
             <div class="chat-input-wrapper">
-                <input type="text" id="messageInput" placeholder="Ketik pesan Anda...">
+                <input type="text" id="messageInput" placeholder="Mulai chat...">
                 <button id="sendBtn" onclick="sendMessage()">➤</button>
             </div>
         </div>
@@ -59,30 +60,33 @@
         let lastReplyTime = 0;
         let pollingInterval = null;
 
-        function debug(msg) {
+        const debugEl = document.getElementById('debug');
+        function debug(msg, showChat=false) {
             console.log(msg);
-            const d = document.getElementById('debug');
-            d.style.display = 'block';
-            d.innerHTML += `[${new Date().toLocaleTimeString()}] ${msg}<br>`;
-            d.scrollTop = d.scrollHeight;
-            setTimeout(()=>d.style.display='none',10000);
+            debugEl.innerHTML += `[${new Date().toLocaleTimeString()}] ${msg}<br>`;
+            debugEl.scrollTop = debugEl.scrollHeight;
+            debugEl.classList.add('show');
+            setTimeout(()=>debugEl.classList.remove('show'),15000);
+            
+            if (showChat) {
+                // Force scroll
+                const chat = document.getElementById('chatMessages');
+                chat.scrollTop = chat.scrollHeight;
+            }
         }
 
-        // Generate ticket - SIMPLIFIED
         async function generateTicket() {
             try {
                 const res = await fetch('https://api.ipify.org?format=json');
                 const ip = await res.json();
-                currentTicketId = `ID${ip.ip.replace(/\./g,'').slice(-6)}`;
-            } catch {
-                currentTicketId = `ID${Date.now().toString(36).slice(-6).toUpperCase()}`;
+                currentTicketId = `T${ip.ip.replace(/[^0-9]/g,'').slice(-6)}`;
+            } catch(e) {
+                currentTicketId = `T${Math.random().toString(36).substr(2,6).toUpperCase()}`;
             }
-            debug(`🎫 Ticket: ${currentTicketId}`);
-            document.getElementById('connectionStatus').innerHTML = `Ticket ${currentTicketId.slice(0,4)}... <span class="status-dot"></span>`;
+            debug(`🎫 NEW TICKET: ${currentTicketId}`);
             return currentTicketId;
         }
 
-        // Send user message
         async function sendToTelegram(text) {
             const msg = `🆔 ${currentTicketId}\n\n${text}`;
             try {
@@ -92,22 +96,22 @@
                     body: JSON.stringify({
                         chat_id: CHAT_ID,
                         text: msg,
-                        parse_mode: 'Markdown'
+                        parse_mode: 'HTML'
                     })
                 });
                 const data = await res.json();
-                debug(`📤 User msg: ${data.ok ? '✅' : data.description}`);
+                debug(`📤 SENT → ${data.ok ? '✅ OK' : '❌ ' + data.description}`);
                 return data.ok;
             } catch(e) {
-                debug(`❌ Send error: ${e.message}`);
+                debug(`❌ SEND FAIL: ${e.message}`);
                 return false;
             }
         }
 
-        // FIXED: ULTRA SIMPLE REPLY DETECTION
+        // FIXED: SIMPLEST REPLY DETECTION EVER
         async function pollTelegram() {
             try {
-                const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getUpdates?offset=${lastUpdateId + 1}`);
+                const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getUpdates?offset=${lastUpdateId + 1}&limit=5`);
                 const data = await res.json();
                 
                 if (data.ok && data.result.length) {
@@ -115,31 +119,45 @@
                         lastUpdateId = update.update_id;
                         const msg = update.message;
                         
-                        if (msg && msg.chat.id.toString() === CHAT_ID && msg.text) {
+                        if (msg?.chat?.id?.toString() === CHAT_ID && msg.text) {
                             const text = msg.text;
-                            debug(`📥 Raw: ${text.substring(0,100)}`);
+                            debug(`📥 GOT: "${text.substring(0,80)}..."`);
                             
-                            // ANY MESSAGE containing ticket ID = REPLY
+                            // CRITICAL FIX: ANY text containing ticket = reply
                             if (text.includes(currentTicketId)) {
-                                // Anti-duplicate
-                                if (Date.now() - lastReplyTime < 1500) continue;
+                                if (Date.now() - lastReplyTime < 1000) {
+                                    debug('⏭️ Duplicate skip');
+                                    continue;
+                                }
                                 lastReplyTime = Date.now();
                                 
-                                // Extract reply text (after ticket)
-                                const replyText = text.split(currentTicketId)[1]?.trim() || text;
-                                const cleanText = replyText.replace(/🆔.*?\n/gi, '').trim();
+                                // FIXED: Extract EVERYTHING after ticket
+                                let replyText = text;
+                                const ticketPos = text.indexOf(currentTicketId);
+                                if (ticketPos !== -1) {
+                                    replyText = text.slice(ticketPos + currentTicketId.length).trim();
+                                }
                                 
-                                if (cleanText) {
-                                    addMessage(cleanText, 'admin');
-                                    saveMessage(cleanText, 'admin');
-                                    debug(`✅ REPLY: ${cleanText}`);
+                                // Clean up common patterns
+                                replyText = replyText
+                                    .replace(/🆔.*?\n/gi, '')
+                                    .replace(/T\d{6}.*?\n/gi, '')
+                                    .replace(/\n\n+/g, '\n')
+                                    .trim();
+                                
+                                if (replyText && replyText.length > 0) {
+                                    debug(`🎉 ADDING TO CHAT: "${replyText}"`, true);
+                                    addMessage(replyText, 'admin');
+                                    saveMessage(replyText, 'admin');
+                                } else {
+                                    debug('⚠️ Empty reply text');
                                 }
                             }
                         }
                     }
                 }
             } catch(e) {
-                debug(`Poll error: ${e.message}`);
+                debug(`❌ POLL: ${e.message}`);
             }
         }
 
@@ -150,13 +168,17 @@
             
             const btn = document.getElementById('sendBtn');
             btn.disabled = true;
+            btn.textContent = '⏳';
             
             addMessage(text, 'user');
             saveMessage(text, 'user');
             input.value = '';
             
-            await sendToTelegram(text);
+            const ok = await sendToTelegram(text);
+            debug(`User "${text}" → Telegram: ${ok ? '✅' : '❌'}`);
+            
             btn.disabled = false;
+            btn.textContent = '➤';
         }
 
         function addMessage(text, sender) {
@@ -164,49 +186,74 @@
             if (container.children[0]?.classList.contains('welcome-msg')) {
                 container.innerHTML = '';
             }
+            
             const div = document.createElement('div');
             div.className = `message ${sender}`;
             const time = new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
             div.innerHTML = `<div class="message-content">${text.replace(/[*_`]/g,'')}<div class="message-time">${time}</div></div>`;
             container.appendChild(div);
             container.scrollTop = container.scrollHeight;
+            
+            // Visual feedback
+            div.style.transform = 'scale(0.95)';
+            setTimeout(()=>div.style.transform = 'scale(1)', 200);
         }
 
         function saveMessage(text, sender) {
-            const chats = JSON.parse(localStorage.getItem(`chat_${currentTicketId}`)||'[]');
-            chats.push({text,sender,time:Date.now()});
-            localStorage.setItem(`chat_${currentTicketId}`,JSON.stringify(chats));
+            try {
+                const chats = JSON.parse(localStorage.getItem(`chat_${currentTicketId}`)||'[]');
+                chats.push({text, sender, time: Date.now()});
+                localStorage.setItem(`chat_${currentTicketId}`, JSON.stringify(chats));
+            } catch(e) {
+                debug(`Storage error: ${e.message}`);
+            }
         }
 
         function loadMessages() {
-            const saved = localStorage.getItem(`chat_${currentTicketId}`);
-            if (saved) JSON.parse(saved).forEach(msg=>addMessage(msg.text,msg.sender));
+            try {
+                const saved = localStorage.getItem(`chat_${currentTicketId}`);
+                if (saved) {
+                    JSON.parse(saved).forEach(msg => addMessage(msg.text, msg.sender));
+                }
+            } catch(e) {
+                debug(`Load error: ${e.message}`);
+            }
         }
 
         async function init() {
-            debug('🚀 Starting...');
+            debug('🔥 LIVE CHAT STARTING...');
             await generateTicket();
             loadMessages();
             
-            // Send welcome
-            await sendToTelegram('👋 Siap chat');
+            // Welcome message
+            await sendToTelegram('👋 Online');
             
-            // Start polling every 1s
-            pollingInterval = setInterval(pollTelegram, 1000);
-            pollTelegram(); // First poll
+            // Poll every 800ms
+            pollingInterval = setInterval(pollTelegram, 800);
+            await pollTelegram();
             
-            document.getElementById('connectionStatus').innerHTML = 'Online<span class="status-dot"></span>';
-            debug('✅ READY!');
+            document.getElementById('connectionStatus').innerHTML = 'Live<span class="status-dot"></span>';
+            debug('✅ FULLY READY!');
         }
 
-        document.getElementById('messageInput').addEventListener('keypress',e=>{
-            if (e.key==='Enter' && !e.shiftKey) {
+        document.getElementById('messageInput').addEventListener('keypress', e => {
+            if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 sendMessage();
             }
         });
 
-        window.addEventListener('load',init);
+        // DEBUG BUTTON - klik 5x untuk toggle debug
+        let debugClicks = 0;
+        document.addEventListener('click', () => {
+            debugClicks++;
+            if (debugClicks === 5) {
+                debugEl.classList.add('show');
+                debugClicks = 0;
+            }
+        });
+
+        window.addEventListener('load', init);
     </script>
 </body>
 </html>
