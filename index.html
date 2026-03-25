@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Order Noko Yanto - JasaOTP.ID</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #ff6b6b, #feca57);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        select:focus, input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .status {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        
+        .status.loading {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .result-box {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+            word-break: break-all;
+            margin: 10px 0;
+        }
+        
+        .otp {
+            font-size: 28px;
+            font-weight: bold;
+            color: #ff6b6b;
+            background: #ffeaa7;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 15px;
+        }
+        
+        .auto-refresh {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        
+        .balance {
+            background: linear-gradient(135deg, #a8edea, #fed6e3);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Auto Order Noko Yanto</h1>
+            <p>JasaOTP.ID - API Ready</p>
+        </div>
+        
+        <div class="content">
+            <div id="balanceBox" class="balance" style="display: none;">
+                <strong>Saldo: <span id="saldo">0</span></strong>
+            </div>
+            
+            <div id="status" class="status" style="display: none;"></div>
+            
+            <div class="form-group">
+                <label for="negara">🇮🇩 Negara:</label>
+                <select id="negara">
+                    <option value="">Loading...</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="operator">📱 Operator:</label>
+                <select id="operator" disabled>
+                    <option value="">Pilih negara dulu</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="layanan">🎯 Layanan:</label>
+                <select id="layanan" disabled>
+                    <option value="">Pilih negara dulu</option>
+                </select>
+            </div>
+            
+            <button class="btn" id="orderBtn" onclick="buatOrder()">
+                🚀 BUAT ORDER SEKARANG
+            </button>
+            
+            <div id="resultBox" class="result-box">
+                <div style="text-align: center;">
+                    <div class="number" id="phoneNumber"></div>
+                    <div id="orderId" style="color: #666; margin: 10px 0;"></div>
+                    <button class="btn" onclick="cekOTP()" id="cekOtpBtn" style="margin-top: 10px; width: auto; padding: 10px 20px;">
+                        📱 CEK OTP
+                    </button>
+                    <button class="btn" onclick="cancelOrder()" id="cancelBtn" style="margin-top: 10px; width: auto; padding: 10px 20px; background: #ff6b6b;">
+                        ❌ CANCEL ORDER
+                    </button>
+                </div>
+                <div id="otpResult" class="otp" style="display: none;"></div>
+                <div class="auto-refresh" id="autoRefresh"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://api.jasaotp.id/v1/';
+        const API_KEY = 'd2c16800b8aba6bafd60499727a16fa9';
+        let currentOrderId = null;
+        let autoCheckInterval = null;
+
+        // Inisialisasi
+        window.onload = function() {
+            loadNegara();
+            loadSaldo();
+        };
+
+        // Load Saldo
+        async function loadSaldo() {
+            try {
+                const response = await fetch(`${API_BASE}balance.php?api_key=${API_KEY}`);
+                const data = await response.json();
+                if (data.success) {
+                    document.getElementById('saldo').textContent = data.data.saldo.toLocaleString();
+                    document.getElementById('balanceBox').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error load saldo:', error);
+            }
+        }
+
+        // Load Daftar Negara
+        async function loadNegara() {
+            try {
+                const response = await fetch(`${API_BASE}negara.php`);
+                const data = await response.json();
+                const select = document.getElementById('negara');
+                select.innerHTML = '<option value="">Pilih Negara</option>';
+                
+                data.data.forEach(negara => {
+                    const option = document.createElement('option');
+                    option.value = negara.id_negara;
+                    option.textContent = negara.nama_negara;
+                    select.appendChild(option);
+                });
+                
+                select.onchange = function() {
+                    loadOperator(this.value);
+                    loadLayanan(this.value);
+                };
+            } catch (error) {
+                console.error('Error load negara:', error);
+            }
+        }
+
+        // Load Operator
+        async function loadOperator(negaraId) {
+            if (!negaraId) {
+                document.getElementById('operator').innerHTML = '<option value="">Pilih negara dulu</option>';
+                document.getElementById('operator').disabled = true;
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}operator.php?negara=${negaraId}`);
+                const data = await response.json();
+                const select = document.getElementById('operator');
+                select.innerHTML = '<option value="">Pilih Operator</option>';
+                select.disabled = false;
+                
+                const operators = data.data[negaraId] || [];
+                operators.forEach(operator => {
+                    const option = document.createElement('option');
+                    option.value = operator;
+                    option.textContent = operator;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error load operator:', error);
+            }
+        }
+
+        // Load Layanan
+        async function loadLayanan(negaraId) {
+            if (!negaraId) {
+                document.getElementById('layanan').innerHTML = '<option value="">Pilih negara dulu</option>';
+                document.getElementById('layanan').disabled = true;
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}layanan.php?negara=${negaraId}`);
+                const data = await response.json();
+                const select = document.getElementById('layanan');
+                select.innerHTML = '<option value="">Pilih Layanan</option>';
+                select.disabled = false;
+                
+                const layanan = data[negaraId] || {};
+                Object.keys(layanan).forEach(key => {
+                    const option = document.createElement('option');
+                    option.value = key;
+                    option.textContent = `${layanan[key].layanan} (${layanan[key].harga} - Stok: ${layanan[key].stok})`;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error load layanan:', error);
+            }
+        }
+
+        // Buat Order
+        async function buatOrder() {
+            const negara = document.getElementById('negara').value;
+            const operator = document.getElementById('operator').value;
+            const layanan = document.getElementById('layanan').value;
+            
+            if (!negara || !operator || !layanan) {
+                showStatus('error', '⚠️ Lengkapi semua field terlebih dahulu!');
+                return;
+            }
+            
+            const btn = document.getElementById('orderBtn');
+            const status = document.getElementById('status');
+            
+            btn.disabled = true;
+            btn.textContent = '⏳ Membuat Order...';
+            status.style.display = 'block';
+            showStatus('loading', '🔄 Sedang membuat order...');
+            
+            try {
+                const response = await fetch(`${API_BASE}order.php?api_key=${API_KEY}&negara=${negara}&layanan=${layanan}&operator=${operator}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentOrderId = data.data.order_id;
+                    document.getElementById('phoneNumber').textContent = data.data.number;
+                    document.getElementById('orderId').textContent = `Order ID: ${currentOrderId}`;
+                    document.getElementById('resultBox').style.display = 'block';
+                    document.getElementById('cekOtpBtn').disabled = false;
+                    document.getElementById('cancelBtn').disabled = false;
+                    showStatus('success', '✅ Order berhasil dibuat!');
+                    
+                    // Auto check OTP
+                    startAutoCheck();
+                } else {
+                    showStatus('error', `❌ ${data.message}`);
+                }
+            } catch (error) {
+                showStatus('error', '❌ Error: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🚀 BUAT ORDER SEKARANG';
+                setTimeout(() => status.style.display = 'none', 3000);
+            }
+        }
+
+        // Cek OTP
+        async function cekOTP() {
+            if (!currentOrderId) return;
+            
+            const btn = document.getElementById('cekOtpBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Cek OTP...';
+            
+            try {
+                const response = await fetch(`${API_BASE}sms.php?api_key=${API_KEY}&id=${currentOrderId}`);
+                const data = await response.json();
+                
+                if (data.success && data.data.otp) {
+                    document.getElementById('otpResult').textContent = data.data.otp;
+                    document.getElementById('otpResult').style.display = 'block';
+                    showStatus('success', `✅ OTP diterima: ${data.data.otp}`);
+                    stopAutoCheck();
+                } else {
+                    showStatus('loading', '⏳ OTP masih dalam proses...');
+                }
+            } catch (error) {
+                showStatus('error', '❌ Error cek OTP: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '📱 CEK OTP';
+            }
+        }
+
+        // Cancel Order
+        async function cancelOrder() {
+            if (!currentOrderId || !confirm('Yakin mau cancel order? Saldo akan dikembalikan.')) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}cancel.php?api_key=${API_KEY}&id=${currentOrderId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    showStatus('success', '✅ Order dibatalkan & saldo dikembalikan!');
+                    resetForm();
+                }
+            } catch (error) {
+                showStatus('error', '❌ Error cancel order!');
+            }
+        }
+
+        // Auto Check OTP
+        function startAutoCheck() {
+            let count = 0;
+            document.getElementById('autoRefresh').textContent = '🔄 Auto check OTP setiap 3 detik...';
+            
+            autoCheckInterval = setInterval(async () => {
+                count++;
+                document.getElementById('autoRefresh').textContent = `🔄 Auto check ke-${count}...`;
+                await cekOTP();
+            }, 3000);
+        }
+
+        function stopAutoCheck() {
+            if (autoCheckInterval) {
+                clearInterval(autoCheckInterval);
+                document.getElementById('autoRefresh').textContent = '✅ Auto check selesai!';
+            }
+        }
+
+        function resetForm() {
+            currentOrderId = null;
+            document.getElementById('resultBox').style.display = 'none';
+            document.getElementById('cekOtpBtn').disabled = true;
+            document.getElementById('cancelBtn').disabled = true;
+            stopAutoCheck();
+        }
+
+        function showStatus(type, message) {
+            const status = document.getElementById('status');
+            status.className = `status ${type}`;
+            status.textContent = message;
+            status.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
