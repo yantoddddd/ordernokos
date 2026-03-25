@@ -96,8 +96,8 @@ button:disabled{opacity:.5}
 
 <div class="chat">
 <div class="header">
- LIVE SUPPORT
- <div class="status" id="status">Connecting...</div>
+ LIVE CHAT
+ <div class="status" id="status">YANTO</div>
 </div>
 
 <div class="msgs" id="msgs"></div>
@@ -159,7 +159,7 @@ async function send(){
   headers:{'Content-Type':'application/json'},
   body:JSON.stringify({
    chat_id:CHAT_ID,
-   text:`🆔 ${ticket}\n${t}`
+   text:`ID ${ticket}\n${t}`
   })
  });
 
