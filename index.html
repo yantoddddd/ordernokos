@@ -3,237 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Chat Support</title>
+    <title>Live Chat - WORKING REPLY</title>
     <style>
-        /* [SAME CLEAN CSS - NO CHANGE] */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh; display: flex; justify-content: center; align-items: center;
-            padding: 20px;
-        }
-        .chat-container {
-            width: 100%; max-width: 450px; background: white;
-            border-radius: 24px; box-shadow: 0 25px 50px rgba(0,0,0,0.15);
-            overflow: hidden;
-        }
-        .chat-header { 
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white; padding: 24px 20px; text-align: center;
-        }
-        .chat-title { 
-            font-size: 22px; font-weight: 700; letter-spacing: -0.5px;
-        }
-        .status { 
-            font-size: 12px; margin-top: 8px; opacity: 0.9;
-            font-weight: 500;
-        }
-        .status.connected { color: #28a745; }
-        .status.polling { color: #007bff; }
-        .chat-messages { 
-            height: 450px; padding: 24px 20px; overflow-y: auto; 
-            background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
-        }
-        .message { 
-            margin-bottom: 16px; display: flex; animation: fadeIn 0.4s ease-out;
-        }
-        .message.user { justify-content: flex-end; }
-        .message.admin { justify-content: flex-start; }
-        .message-content { 
-            max-width: 85%; padding: 14px 18px; border-radius: 20px;
-            font-size: 15px; line-height: 1.4; position: relative;
-        }
-        .message.user .message-content {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white; border-bottom-right-radius: 6px;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-        }
-        .message.admin .message-content {
-            background: white; border: 1px solid #e9ecef;
-            border-bottom-left-radius: 6px; box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-        }
-        .message-time { 
-            font-size: 11px; opacity: 0.7; margin-top: 6px; font-weight: 400;
-        }
-        .chat-input-container { 
-            padding: 20px; background: white; border-top: 1px solid #f1f3f4;
-        }
-        .chat-input-wrapper { 
-            display: flex; gap: 12px; background: #f8f9fa; 
-            padding: 12px 16px; border-radius: 28px; border: 2px solid #e9ecef;
-        }
-        #messageInput { 
-            flex: 1; padding: 0; border: none; background: none;
-            font-size: 15px; outline: none; color: #333;
-        }
-        #messageInput::placeholder { color: #999; }
-        #sendBtn { 
-            width: 48px; height: 48px; border-radius: 50%;
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white; border: none; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 18px; transition: all 0.2s;
-        }
-        #sendBtn:hover:not(:disabled) { 
-            transform: scale(1.05); box-shadow: 0 4px 16px rgba(40, 167, 69, 0.4);
-        }
-        #sendBtn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-        .welcome-msg {
-            text-align: center; color: #666; padding: 40px 20px;
-            font-size: 15px; line-height: 1.5;
-        }
-        @keyframes fadeIn { 
-            from { opacity: 0; transform: translateY(15px); } 
-            to { opacity: 1; transform: translateY(0); } 
-        }
-        .status-dot {
-            display: inline-block; width: 8px; height: 8px;
-            background: currentColor; border-radius: 50%; margin-left: 6px;
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px}
+        .chat-container{width:100%;max-width:450px;background:white;border-radius:24px;box-shadow:0 25px 50px rgba(0,0,0,.15);overflow:hidden}
+        .chat-header{background:linear-gradient(135deg,#28a745 0%,#20c997 100%);color:white;padding:24px 20px;text-align:center}
+        .chat-title{font-size:22px;font-weight:700}
+        .status{font-size:12px;margin-top:8px;opacity:.9;font-weight:500}
+        .status-dot{display:inline-block;width:8px;height:8px;background:currentColor;border-radius:50%;margin-left:6px;animation:pulse 2s infinite}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+        .chat-messages{height:450px;padding:24px 20px;overflow-y:auto;background:linear-gradient(180deg,#f8f9fa 0%,#e9ecef 100%)}
+        .message{margin-bottom:16px;display:flex;animation:fadeIn .4s ease-out}
+        .message.user{justify-content:flex-end}
+        .message.admin{justify-content:flex-start}
+        .message-content{max-width:85%;padding:14px 18px;border-radius:20px;font-size:15px;line-height:1.4}
+        .message.user .message-content{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;border-bottom-right-radius:6px;box-shadow:0 4px 12px rgba(102,126,234,.3)}
+        .message.admin .message-content{background:white;border:1px solid #e9ecef;border-bottom-left-radius:6px;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+        .message-time{font-size:11px;opacity:.7;margin-top:6px;font-weight:400}
+        .chat-input-container{padding:20px;background:white;border-top:1px solid #f1f3f4}
+        .chat-input-wrapper{display:flex;gap:12px;background:#f8f9fa;padding:12px 16px;border-radius:28px;border:2px solid #e9ecef}
+        #messageInput{flex:1;padding:0;border:none;background:none;font-size:15px;outline:none;color:#333}
+        #messageInput::placeholder{color:#999}
+        #sendBtn{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#28a745 0%,#20c997 100%);color:white;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;transition:all .2s}
+        #sendBtn:hover:not(:disabled){transform:scale(1.05);box-shadow:0 4px 16px rgba(40,167,69,.4)}
+        #sendBtn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .welcome-msg{text-align:center;color:#666;padding:40px 20px;font-size:15px;line-height:1.5}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}
+        #debug{position:fixed;bottom:10px;right:10px;background:rgba(0,0,0,.9);color:lime;padding:10px;border-radius:8px;font-size:12px;max-width:300px;max-height:200px;overflow:auto;z-index:9999;display:none}
     </style>
 </head>
 <body>
     <div class="chat-container">
         <div class="chat-header">
             <div class="chat-title">Live Support</div>
-            <div class="status polling" id="connectionStatus">
-                Menghubungkan...<span class="status-dot"></span>
-            </div>
+            <div class="status polling" id="connectionStatus">Menghubungkan...<span class="status-dot"></span></div>
         </div>
-        
         <div class="chat-messages" id="chatMessages">
-            <div class="welcome-msg">
-                <strong>Sedang menghubungkan dengan agen...</strong><br>
-                Ketik pesan Anda untuk memulai chat
-            </div>
+            <div class="welcome-msg"><strong>Sedang menghubungkan...</strong><br>Ketik pesan untuk mulai chat</div>
         </div>
-        
         <div class="chat-input-container">
             <div class="chat-input-wrapper">
-                <input type="text" id="messageInput" 
-                       placeholder="Ketik pesan Anda..." />
-                <button id="sendBtn" onclick="sendMessage()" title="Kirim">
-                    ➤
-                </button>
+                <input type="text" id="messageInput" placeholder="Ketik pesan Anda...">
+                <button id="sendBtn" onclick="sendMessage()">➤</button>
             </div>
         </div>
     </div>
+    <div id="debug"></div>
 
     <script>
         const BOT_TOKEN = '8606015215:AAF0ECEhBqchYwOlgGuwRQD9ggJvhKVYszU';
         const CHAT_ID = '8182530431';
-        let currentTicketId = null;
-        let lastProcessedMsgId = 0;
-        let lastAdminMsgHash = '';
-        let pollingTimer = null;
-        let hasSentFirstMessage = false; // FIXED: Track first message
+        let currentTicketId = '';
+        let lastUpdateId = 0;
+        let lastReplyTime = 0;
+        let pollingInterval = null;
 
-        // Get stable IP
-        async function getStableIP() {
-            try {
-                const res = await fetch('https://api.ipify.org?format=json');
-                const data = await res.json();
-                return btoa(data.ip).replace(/[^A-Z0-9]/g, '').slice(-8).toUpperCase();
-            } catch {
-                return 'LOCAL-' + Date.now().toString(36).slice(-6).toUpperCase();
-            }
+        function debug(msg) {
+            console.log(msg);
+            const d = document.getElementById('debug');
+            d.style.display = 'block';
+            d.innerHTML += `[${new Date().toLocaleTimeString()}] ${msg}<br>`;
+            d.scrollTop = d.scrollHeight;
+            setTimeout(()=>d.style.display='none',10000);
         }
 
-        // Generate ticket
+        // Generate ticket - SIMPLIFIED
         async function generateTicket() {
-            const ipHash = await getStableIP();
-            currentTicketId = `CHAT-${ipHash}`;
-            console.log('🎫 Ticket generated:', currentTicketId);
+            try {
+                const res = await fetch('https://api.ipify.org?format=json');
+                const ip = await res.json();
+                currentTicketId = `ID${ip.ip.replace(/\./g,'').slice(-6)}`;
+            } catch {
+                currentTicketId = `ID${Date.now().toString(36).slice(-6).toUpperCase()}`;
+            }
+            debug(`🎫 Ticket: ${currentTicketId}`);
+            document.getElementById('connectionStatus').innerHTML = `Ticket ${currentTicketId.slice(0,4)}... <span class="status-dot"></span>`;
             return currentTicketId;
         }
 
-        // FIXED: Always send user messages + Smart new user detection
+        // Send user message
         async function sendToTelegram(text) {
+            const msg = `🆔 ${currentTicketId}\n\n${text}`;
             try {
-                // ALWAYS send user message with ticket
-                let fullText = `🆔 *${currentTicketId}*\n\n👤 *User:*\n${text}`;
-                
-                // NEW USER notification - ONLY if no chat history
-                const chatHistory = localStorage.getItem(`chat_${currentTicketId}`);
-                const isNewUser = !chatHistory || JSON.parse(chatHistory).length === 0;
-                
-                if (isNewUser) {
-                    fullText = `👤 *NEW USER*\n🆔 *Ticket:* \`${currentTicketId}\`\n⏰ *${new Date().toLocaleString('id-ID')}\n\n${text}\n\n*REPLY untuk balas*`;
-                }
-                
-                const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
-                const res = await fetch(url, {
+                const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
                         chat_id: CHAT_ID,
-                        text: fullText,
-                        parse_mode: 'Markdown',
-                        disable_web_page_preview: true
+                        text: msg,
+                        parse_mode: 'Markdown'
                     })
                 });
-                
                 const data = await res.json();
-                console.log('📤 Telegram sent:', data.ok ? '✅' : '❌', fullText.substring(0, 100));
+                debug(`📤 User msg: ${data.ok ? '✅' : data.description}`);
                 return data.ok;
             } catch(e) {
-                console.error('❌ Telegram error:', e);
+                debug(`❌ Send error: ${e.message}`);
                 return false;
             }
         }
 
-        // Polling
+        // FIXED: ULTRA SIMPLE REPLY DETECTION
         async function pollTelegram() {
-            if (!currentTicketId) return;
             try {
-                const url = `https://api.telegram.org/bot${BOT_TOKEN}/getUpdates?offset=${lastProcessedMsgId + 1}&limit=3`;
-                const res = await fetch(url);
+                const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getUpdates?offset=${lastUpdateId + 1}`);
                 const data = await res.json();
                 
-                if (data.ok) {
+                if (data.ok && data.result.length) {
                     for (let update of data.result) {
-                        await processUpdate(update);
+                        lastUpdateId = update.update_id;
+                        const msg = update.message;
+                        
+                        if (msg && msg.chat.id.toString() === CHAT_ID && msg.text) {
+                            const text = msg.text;
+                            debug(`📥 Raw: ${text.substring(0,100)}`);
+                            
+                            // ANY MESSAGE containing ticket ID = REPLY
+                            if (text.includes(currentTicketId)) {
+                                // Anti-duplicate
+                                if (Date.now() - lastReplyTime < 1500) continue;
+                                lastReplyTime = Date.now();
+                                
+                                // Extract reply text (after ticket)
+                                const replyText = text.split(currentTicketId)[1]?.trim() || text;
+                                const cleanText = replyText.replace(/🆔.*?\n/gi, '').trim();
+                                
+                                if (cleanText) {
+                                    addMessage(cleanText, 'admin');
+                                    saveMessage(cleanText, 'admin');
+                                    debug(`✅ REPLY: ${cleanText}`);
+                                }
+                            }
+                        }
                     }
                 }
             } catch(e) {
-                // Silent
+                debug(`Poll error: ${e.message}`);
             }
         }
 
-        // Process admin replies
-        async function processUpdate(update) {
-            const msg = update.message;
-            if (!msg || msg.chat.id.toString() !== CHAT_ID) return;
-            
-            const msgId = msg.message_id;
-            if (msgId <= lastProcessedMsgId) return;
-            lastProcessedMsgId = msgId;
-            
-            if (msg.reply_to_message?.from?.is_bot) {
-                const repliedText = msg.reply_to_message.text || '';
-                const ticketMatch = repliedText.match(/🆔\s*\*?CHAT\-([A-Z0-9]{8})\*?/i);
-                
-                if (ticketMatch && ticketMatch[1] === currentTicketId.slice(5)) {
-                    const replyText = msg.text?.trim() || '[Media]';
-                    const msgHash = btoa(replyText).slice(0, 16);
-                    
-                    if (msgHash === lastAdminMsgHash) return;
-                    lastAdminMsgHash = msgHash;
-                    
-                    addMessage(replyText, 'admin');
-                    saveMessage(replyText, 'admin');
-                    console.log('✅ Admin reply:', replyText.substring(0, 50));
-                }
-            }
-        }
-
-        // FIXED Send message - ALWAYS WORKS
         async function sendMessage() {
             const input = document.getElementById('messageInput');
             const text = input.value.trim();
@@ -242,89 +151,62 @@
             const btn = document.getElementById('sendBtn');
             btn.disabled = true;
             
-            // UI first
             addMessage(text, 'user');
             saveMessage(text, 'user');
             input.value = '';
             
-            // Telegram - GUARANTEED send
-            const success = await sendToTelegram(text);
-            console.log('📤 First message sent:', success ? '✅' : '❌');
-            
+            await sendToTelegram(text);
             btn.disabled = false;
         }
 
-        // Add message UI
         function addMessage(text, sender) {
             const container = document.getElementById('chatMessages');
             if (container.children[0]?.classList.contains('welcome-msg')) {
                 container.innerHTML = '';
             }
-            
             const div = document.createElement('div');
             div.className = `message ${sender}`;
-            const time = new Date().toLocaleTimeString('id-ID', {
-                hour: '2-digit', minute: '2-digit'
-            });
-            
-            div.innerHTML = `
-                <div class="message-content">
-                    ${text.replace(/[*_`]/g, '')}
-                    <div class="message-time">${time}</div>
-                </div>
-            `;
-            
+            const time = new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+            div.innerHTML = `<div class="message-content">${text.replace(/[*_`]/g,'')}<div class="message-time">${time}</div></div>`;
             container.appendChild(div);
             container.scrollTop = container.scrollHeight;
         }
 
-        // Storage
         function saveMessage(text, sender) {
-            const chats = JSON.parse(localStorage.getItem(`chat_${currentTicketId}`) || '[]');
-            chats.push({text, sender, time: Date.now()});
-            localStorage.setItem(`chat_${currentTicketId}`, JSON.stringify(chats));
+            const chats = JSON.parse(localStorage.getItem(`chat_${currentTicketId}`)||'[]');
+            chats.push({text,sender,time:Date.now()});
+            localStorage.setItem(`chat_${currentTicketId}`,JSON.stringify(chats));
         }
 
         function loadMessages() {
             const saved = localStorage.getItem(`chat_${currentTicketId}`);
-            if (saved) {
-                JSON.parse(saved).forEach(msg => addMessage(msg.text, msg.sender));
-            }
+            if (saved) JSON.parse(saved).forEach(msg=>addMessage(msg.text,msg.sender));
         }
 
-        // Status
-        function updateStatus(status) {
-            const el = document.getElementById('connectionStatus');
-            el.innerHTML = status === 'polling' 
-                ? 'Menunggu balasan...<span class="status-dot"></span>'
-                : 'Terhubung<span class="status-dot"></span>';
-            el.className = `status ${status}`;
-        }
-
-        // PERFECT INIT
         async function init() {
-            console.log('🚀 Starting chat...');
+            debug('🚀 Starting...');
             await generateTicket();
             loadMessages();
             
-            // Start polling
-            pollingTimer = setInterval(pollTelegram, 1500);
-            pollTelegram();
+            // Send welcome
+            await sendToTelegram('👋 Siap chat');
             
-            updateStatus('polling');
-            console.log('✅ Ready! Ticket:', currentTicketId);
+            // Start polling every 1s
+            pollingInterval = setInterval(pollTelegram, 1000);
+            pollTelegram(); // First poll
+            
+            document.getElementById('connectionStatus').innerHTML = 'Online<span class="status-dot"></span>';
+            debug('✅ READY!');
         }
 
-        // Events
-        document.getElementById('messageInput').addEventListener('keypress', e => {
-            if (e.key === 'Enter' && !e.shiftKey) {
+        document.getElementById('messageInput').addEventListener('keypress',e=>{
+            if (e.key==='Enter' && !e.shiftKey) {
                 e.preventDefault();
                 sendMessage();
             }
         });
 
-        // Auto start
-        window.addEventListener('load', init);
+        window.addEventListener('load',init);
     </script>
 </body>
 </html>
