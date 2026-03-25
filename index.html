@@ -69,9 +69,7 @@
         </div>
         
         <div class="chat-messages" id="chatMessages">
-            <div style="text-align: center; color: #666; padding: 30px 0;">
-                <div>🔄 Menghubungkan dengan agen...</div>
-            </div>
+            <!-- HAPUS welcome message -->
         </div>
         
         <div class="chat-input-container">
@@ -88,6 +86,7 @@
         let currentTicketId = null;
         let lastProcessedMsgId = parseInt(localStorage.getItem('lastMsgId') || '0');
         let pollingTimer = null;
+        const NOTIFIED_KEY = 'notified_'; // Per ticket notification flag
 
         // Get IP ticket
         async function getVisitorIP() {
@@ -107,7 +106,21 @@
             return currentTicketId;
         }
 
-        // FIXED: Send with session check
+        // FIXED: Smart notification - ONCE per session
+        async function sendWelcomeIfNew() {
+            const notified = localStorage.getItem(NOTIFIED_KEY + currentTicketId);
+            if (notified) {
+                console.log('ℹ️ Already notified for this ticket');
+                return false;
+            }
+            
+            await sendToTelegram('👋 *User baru online*');
+            localStorage.setItem(NOTIFIED_KEY + currentTicketId, 'true');
+            console.log('✅ Welcome sent ONCE');
+            return true;
+        }
+
+        // Send message
         async function sendToTelegram(text) {
             try {
                 const fullText = `🆔 *${currentTicketId}*\n\n${text}`;
@@ -127,7 +140,7 @@
             }
         }
 
-        // FIXED: NO DUPLICATES EVER
+        // Polling
         async function pollTelegram() {
             if (!currentTicketId) return;
             try {
@@ -145,7 +158,7 @@
             }
         }
 
-        // FIXED: Process with TIME + CONTENT duplicate check
+        // Process replies
         async function processTelegramUpdate(update) {
             if (update.message?.chat?.id?.toString() !== CHAT_ID) return;
             
@@ -153,42 +166,35 @@
             if (msgId <= lastProcessedMsgId) return;
             
             lastProcessedMsgId = Math.max(lastProcessedMsgId, msgId);
-            localStorage.setItem('lastMsgId', lastProcessedMsgId); // PERSISTENT
+            localStorage.setItem('lastMsgId', lastProcessedMsgId);
             
             const replyText = update.message.text?.trim();
             if (!replyText) return;
             
-            // REPLY DETECTION
             if (update.message.reply_to_message?.from?.is_bot) {
                 const repliedText = update.message.reply_to_message.text || '';
                 const ticketMatch = repliedText.match(/🆔\s*\*?IP\-([A-Z0-9]{8})\*?/i);
                 
                 if (ticketMatch && ticketMatch[1] === currentTicketId.slice(3)) {
-                    // TRIPLE DUPLICATE CHECK
-                    const msgHash = btoa(replyText).slice(0, 15);
+                    // DUPLICATE CHECK
                     const now = Date.now();
                     const recentChats = JSON.parse(localStorage.getItem(`chat_${currentTicketId}`) || '[]');
-                    
-                    // Check if already exists (time + content)
                     const exists = recentChats.some(chat => 
                         chat.sender === 'admin' && 
                         chat.text === replyText && 
-                        now - chat.time < 60000 // 1 minute
+                        now - chat.time < 300000 // 5 minutes
                     );
                     
-                    if (exists) {
-                        console.log('⏭️ Duplicate blocked');
-                        return;
-                    }
+                    if (exists) return;
                     
                     addMessage(replyText, 'admin');
                     saveMessage(replyText, 'admin');
-                    console.log('✅ NEW Reply:', replyText);
+                    console.log('✅ Reply:', replyText);
                 }
             }
         }
 
-        // Send message
+        // Send user message
         async function sendMessage() {
             const input = document.getElementById('messageInput');
             const text = input.value.trim();
@@ -225,45 +231,38 @@
             container.scrollTop = container.scrollHeight;
         }
 
-        // FIXED Storage - with timestamp
+        // Storage
         function saveMessage(text, sender) {
             const chats = JSON.parse(localStorage.getItem(`chat_${currentTicketId}`) || '[]');
             chats.push({text, sender, time: Date.now()});
             localStorage.setItem(`chat_${currentTicketId}`, JSON.stringify(chats));
         }
 
-        // FIXED Load - skip old messages
+        // Load recent only
         function loadMessages() {
             const saved = localStorage.getItem(`chat_${currentTicketId}`);
             if (saved) {
                 const chats = JSON.parse(saved);
                 const now = Date.now();
-                // Only load recent messages (last 1 hour)
-                const recentChats = chats.filter(chat => now - chat.time < 3600000);
-                
-                recentChats.forEach(msg => addMessage(msg.text, msg.sender));
-                console.log(`📦 Loaded ${recentChats.length} recent messages`);
+                const recent = chats.filter(c => now - c.time < 3600000); // 1 hour
+                recent.forEach(msg => addMessage(msg.text, msg.sender));
             }
         }
 
-        // INIT
+        // CLEAN INIT
         async function initChat() {
-            console.log('🚀 Anti-duplicate chat starting...');
+            console.log('🚀 Clean chat init...');
             
             await generateIPTicket();
             loadMessages();
             
-            // Welcome
-            await sendToTelegram('👋 User ready');
+            // Welcome ONCE only
+            await sendWelcomeIfNew();
             
             pollingTimer = setInterval(pollTelegram, 2000);
             pollTelegram();
             
             document.getElementById('connectionStatus').textContent = '✅ Live';
-            
-            setTimeout(() => {
-                addMessage('Mulai chat dengan agen sekarang!', 'admin');
-            }, 500);
         }
 
         document.getElementById('messageInput').addEventListener('keypress', e => {
