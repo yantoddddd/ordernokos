@@ -3,38 +3,51 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width">
-<title>Noko Yanto Pro</title>
+<title>Noko Yanto - Deposit Instant</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif}
 body{background:#667eea;padding:20px}
 .box{max-width:500px;margin:auto;background:#fff;border-radius:15px;padding:25px;box-shadow:0 10px 30px rgba(0,0,0,0.2)}
 h1{text-align:center;color:#ff6b6b;margin-bottom:20px;font-size:24px}
-select,.btn{width:100%;padding:12px;margin:10px 0;border-radius:8px;border:1px solid #ddd;font-size:16px}
+select,input,.btn{width:100%;padding:12px;margin:10px 0;border-radius:8px;border:1px solid #ddd;font-size:16px}
 .btn{background:#667eea;color:white;border:none;cursor:pointer;font-weight:bold;font-size:16px}
 .btn:hover{background:#5a67d8}
 .btn:disabled{background:#ccc;cursor:not-allowed}
 .btn.deposit{background:#48bb78}
 .btn.deposit:hover{background:#38a169}
+.btn.buy{background:#e53e3e}
+.btn.buy:hover{background:#c53030}
 .num{font-size:22px;color:#667eea;font-weight:bold;text-align:center;margin:15px 0;padding:15px;background:#f0f8ff;border-radius:8px}
-.otp{font-size:30px;color:#e53e3e;background:#fed7d7;padding:20px;border-radius:10px;text-align:center;margin:15px 0;font-weight:bold}
+.otp{font-size:30px;color:#38a169;background:#c6f6d5;padding:20px;border-radius:10px;text-align:center;margin:15px 0;font-weight:bold}
 .status{padding:12px;border-radius:8px;margin:10px 0;font-weight:bold}
 .ok{background:#c6f6d5;color:#22543d;border:1px solid #9ae6b4}
 .error{background:#fed7d7;color:#742a2a;border:1px solid #fc8181}
 .wait{background:#fef5e7;color:#744210;border:1px solid #f6ad55}
 .balance{background:#bee3f8;padding:12px;border-radius:8px;text-align:center;margin-bottom:15px}
-.low-balance{background:#fed7d7;color:#742a2a;border:1px solid #fc8181;padding:12px;border-radius:8px;margin-bottom:15px;text-align:center}
-#result{display:none}
+#result,#deposit{display:none}
+.deposit-box{background:#f7fafc;padding:20px;border-radius:10px;margin:15px 0;border:2px dashed #cbd5e0}
 </style>
 </head>
 <body>
 <div class="box">
 <h1>🚀 Noko Yanto Pro</h1>
 
-<div id="depositAlert" class="low-balance" style="display:none">
-⚠️ <strong>Saldo 0!</strong> <a href="https://jasaotp.id/deposit" target="_blank" class="btn deposit" style="margin-top:10px;display:inline-block;width:auto;padding:8px 16px;font-size:14px">💳 DEPOSIT SEKARANG</a>
+<div id="balance" class="balance" style="display:none">💰 Saldo: Rp <span id="saldo">0</span></div>
+
+<!-- DEPOSIT FORM -->
+<div id="deposit" class="deposit-box">
+<h3>💳 Deposit Instant</h3>
+<p>Pilih nominal & bayar via QRIS/Pulsa/Transfer</p>
+<input type="number" id="nominal" placeholder="Masukkan nominal (min 5000)" min="5000">
+<select id="metode">
+<option value="qris">QRIS</option>
+<option value="pulsa">Pulsa</option>
+<option value="transfer">Transfer Bank</option>
+</select>
+<button class="btn deposit" onclick="prosesDeposit()">💳 BAYAR SEKARANG</button>
+<div id="paymentInfo" style="margin-top:15px;padding:10px;background:#e6fffa;border-radius:5px;display:none"></div>
 </div>
 
-<div id="balance" class="balance" style="display:none">💰 Saldo: Rp <span id="saldo">0</span></div>
 <div id="status" class="status" style="display:none"></div>
 
 <select id="operator">
@@ -46,8 +59,9 @@ select,.btn{width:100%;padding:12px;margin:10px 0;border-radius:8px;border:1px s
 </select>
 
 <button class="btn" id="waBtn" onclick="order('wa')">🚀 ORDER WA (Rp3000)</button>
-<button class="btn" onclick="order('fb')">📘 ORDER FB (Rp4000)</button>
+<button class="btn buy" onclick="order('fb')">📘 ORDER FB (Rp4000)</button>
 
+<!-- ORDER RESULT -->
 <div id="result">
 <div class="num" id="phone">-</div>
 <div id="orderid" style="text-align:center;color:#666;font-size:14px;margin:10px 0">Order ID: -</div>
@@ -55,10 +69,6 @@ select,.btn{width:100%;padding:12px;margin:10px 0;border-radius:8px;border:1px s
 <button class="btn" onclick="cancel()" id="cancelbtn" disabled style="background:#e53e3e">❌ CANCEL</button>
 <div id="otp" class="otp" style="display:none">-</div>
 <div id="autorefresh" style="text-align:center;color:#666;font-size:12px"></div>
-</div>
-
-<div style="text-align:center;margin-top:20px;font-size:12px;color:#666">
-<a href="https://jasaotp.id" target="_blank">jasaotp.id</a> | API Key: d2c16800b8aba6bafd60499727a16fa9
 </div>
 </div>
 
@@ -84,13 +94,15 @@ async function saldo(){
    document.getElementById('saldo').innerText=s.toLocaleString();
    document.getElementById('balance').style.display='block';
    
-   // Cek saldo rendah
+   // Kontrol deposit & order button
+   let nom=Math.max(5000,3000-s);
    if(s<3000){
-    document.getElementById('depositAlert').style.display='block';
+    document.getElementById('deposit').style.display='block';
     document.getElementById('waBtn').disabled=true;
-    document.getElementById('waBtn').innerText='🚫 SALDO KURANG - DEPOSIT!';
+    document.getElementById('waBtn').innerText='🚫 SALDO KURANG';
+    document.getElementById('nominal').value=nom;
    }else{
-    document.getElementById('depositAlert').style.display='none';
+    document.getElementById('deposit').style.display='none';
     document.getElementById('waBtn').disabled=false;
     document.getElementById('waBtn').innerText='🚀 ORDER WA (Rp3000)';
    }
@@ -98,14 +110,38 @@ async function saldo(){
  }catch(e){console.error(e);}
 }
 
+function prosesDeposit(){
+ let nom=document.getElementById('nominal').value;
+ let met=document.getElementById('metode').value;
+ if(!nom || nom<5000){
+  alert('Minimal Rp5000!');
+  return;
+ }
+ 
+ let info=`✅ BAYAR Rp${nom.toLocaleString()} via ${met.toUpperCase()}\n\n`;
+ info+='📱 Kirim ke:\n';
+ info+='• QRIS: 0812-3456-7890 (JasaOTP)\n';
+ info+='• Pulsa: 081234567890 (Telkomsel/Indosat)\n';
+ info+='• BCA: 1234567890 a/n JasaOTP\n\n';
+ info+='💬 Konfirmasi via WA: wa.me/6281234567890\n';
+ info+='⏰ Proses 1-5 menit';
+ 
+ document.getElementById('paymentInfo').innerHTML=info.replace(/\n/g,'<br>');
+ document.getElementById('paymentInfo').style.display='block';
+ status('ok','💳 Info pembayaran muncul!');
+ 
+ // Auto refresh saldo
+ setTimeout(saldo,5000);
+}
+
 async function order(svc){
  let op=document.getElementById('operator').value;
  let minPrice=svc=='wa'?3000:4000;
  
- // Double check saldo
- let saldoEl=document.getElementById('saldo');
- if(!saldoEl.innerText || parseInt(saldoEl.innerText.replace(/[^\d]/g,''))<minPrice){
-  status('error','💳 Saldo kurang! Deposit dulu');
+ let s=parseInt(document.getElementById('saldo').innerText.replace(/[^\d]/g,''));
+ if(s<minPrice){
+  document.getElementById('deposit').style.display='block';
+  status('error','💳 Saldo kurang! Isi dulu');
   return;
  }
  
@@ -113,7 +149,6 @@ async function order(svc){
  try{
   let r=await fetch(API+'order.php?api_key='+KEY+'&negara=6&layanan='+svc+'&operator='+op);
   let d=await r.json();
-  console.log('Order:',d);
   
   if(d.success){
    orderid=d.data.order_id;
@@ -122,11 +157,11 @@ async function order(svc){
    document.getElementById('result').style.display='block';
    document.getElementById('checkbtn').disabled=false;
    document.getElementById('cancelbtn').disabled=false;
-   status('ok','✅ Order berhasil! No: '+d.data.number);
+   status('ok','✅ Order OK! No: '+d.data.number);
    autoCheck();
-   saldo(); // Refresh saldo
+   saldo();
   }else{
-   status('error','❌ '+ (d.message || 'Order gagal'));
+   status('error','❌ '+ (d.message || 'Gagal'));
   }
  }catch(e){
   status('error','❌ '+e.message);
@@ -138,41 +173,37 @@ async function checkOTP(){
  try{
   let r=await fetch(API+'sms.php?api_key='+KEY+'&id='+orderid);
   let d=await r.json();
-  console.log('OTP:',d);
   
   if(d.success && d.data.otp){
    document.getElementById('otp').innerText=d.data.otp;
    document.getElementById('otp').style.display='block';
    status('ok','✅ OTP: '+d.data.otp);
    clearInterval(interval);
-   document.getElementById('autorefresh').innerText='✅ Auto check selesai';
   }else{
-   status('wait','⏳ Tunggu OTP...');
+   status('wait','⏳ Wait OTP...');
   }
- }catch(e){
-  console.error(e);
- }
+ }catch(e){}
 }
 
 async function cancel(){
- if(!orderid || !confirm('Yakin cancel? Saldo akan balik'))return;
+ if(!orderid || !confirm('Cancel?'))return;
  try{
   let r=await fetch(API+'cancel.php?api_key='+KEY+'&id='+orderid);
   let d=await r.json();
   if(d.success){
-   status('ok','✅ Cancel + refund OK!');
+   status('ok','✅ Cancel + refund!');
    reset();
    saldo();
   }
- }catch(e){console.error(e);}
+ }catch(e){}
 }
 
 function autoCheck(){
  let c=0;
- document.getElementById('autorefresh').innerText='🔄 Auto check setiap 3 detik...';
+ document.getElementById('autorefresh').innerText='🔄 Auto check...';
  interval=setInterval(()=>{
   c++;
-  document.getElementById('autorefresh').innerText='🔄 Check ke-'+c;
+  document.getElementById('autorefresh').innerText='🔄 #'+c;
   checkOTP();
  },3000);
 }
@@ -186,9 +217,9 @@ function reset(){
  document.getElementById('otp').style.display='none';
 }
 
-// START
+// INIT
 saldo();
-setInterval(saldo,30000); // Auto refresh saldo tiap 30 detik
+setInterval(saldo,15000);
 </script>
 </body>
 </html>
