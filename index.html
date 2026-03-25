@@ -1,236 +1,438 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width">
-<title>Noko Yanto - Saldo Real-time</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif}
-body{background:linear-gradient(135deg,#667eea,#764ba2);padding:20px;min-height:100vh}
-.box{max-width:500px;margin:auto;background:#fff;border-radius:20px;padding:30px;box-shadow:0 20px 40px rgba(0,0,0,0.2)}
-h1{text-align:center;color:#ff6b6b;margin-bottom:25px;font-size:28px}
-.balance{display:flex;justify-content:space-between;align-items:center;background:linear-gradient(135deg,#a0aec0,#cbd5e0);padding:15px;border-radius:12px;margin-bottom:20px;font-size:18px;font-weight:bold}
-.balance.low{background:linear-gradient(135deg,#fed7d7,#feb2b2)}
-.nominal{font-size:24px;color:#2d3748}
-.btn{width:100%;padding:15px;margin:10px 0;border-radius:12px;border:none;font-size:16px;font-weight:bold;cursor:pointer;transition:all 0.3s}
-.btn-order{background:linear-gradient(135deg,#48bb78,#38a169);color:white}
-.btn-order:hover{transform:translateY(-2px);box-shadow:0 10px 20px rgba(72,187,120,0.3)}
-.btn-buy{background:linear-gradient(135deg,#ed8936,#dd6b20);color:white}
-.btn-buy:hover{transform:translateY(-2px);box-shadow:0 10px 20px rgba(237,137,54,0.3)}
-.btn:disabled{background:#a0aec0;cursor:not-allowed;transform:none}
-.num{font-size:24px;color:#2d3748;font-weight:bold;text-align:center;margin:20px 0;padding:20px;background:#f7fafc;border-radius:12px;border-left:5px solid #667eea}
-.otp{font-size:32px;color:#38a169;background:#c6f6d5;padding:25px;border-radius:15px;text-align:center;margin:20px 0;font-weight:bold;box-shadow:0 5px 15px rgba(56,166,105,0.2)}
-.status{padding:15px;border-radius:12px;margin:15px 0;font-weight:bold;text-align:center}
-.ok{background:#c6f6d5;color:#22543d;border:1px solid #9ae6b4}
-.error{background:#fed7d7;color:#742a2a;border:1px solid #fc8181}
-.wait{background:#fef5e7;color:#744210;border:1px solid #f6ad55}
-#result,#deposit{display:none}
-select{width:100%;padding:15px;margin:10px 0;border-radius:8px;border:1px solid #e2e8f0;font-size:16px}
-.autorefresh{text-align:center;color:#4a5568;font-size:14px;margin-top:10px;padding:10px;background:#f7fafc;border-radius:8px}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Chat Support</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .chat-container {
+            width: 90%;
+            max-width: 800px;
+            height: 90vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .chat-id {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .chat-title {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            position: relative;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.admin .message-content {
+            background: white;
+            color: #333;
+            border: 1px solid #e1e5e9;
+            border-bottom-left-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .message-time {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+
+        .chat-input-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e1e5e9;
+        }
+
+        .chat-input-wrapper {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        #messageInput {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        #messageInput:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        #sendBtn {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        #sendBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        #sendBtn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .ticket-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 1px solid #e1e5e9;
+        }
+
+        .ticket-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            margin-bottom: 10px;
+            outline: none;
+        }
+
+        .ticket-input:focus {
+            border-color: #667eea;
+        }
+
+        .generate-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        .status {
+            text-align: center;
+            padding: 10px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .status.connected {
+            color: #28a745;
+            background: rgba(40, 167, 69, 0.1);
+        }
+
+        .status.disconnected {
+            color: #dc3545;
+            background: rgba(220, 53, 79, 0.1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
-<div class="box">
-<h1>🚀 Noko Yanto Pro</h1>
+    <div class="chat-container">
+        <div class="ticket-section" id="ticketSection">
+            <h3 style="margin-bottom: 15px; color: #333;">Masukkan Ticket ID atau Buat Baru</h3>
+            <input type="text" class="ticket-input" id="ticketInput" placeholder="Masukkan Ticket ID..." />
+            <button class="generate-btn" onclick="connectToTicket()">🔗 Connect ke Ticket</button>
+            <button class="generate-btn" onclick="generateNewTicket()" style="margin-top: 10px; background: linear-gradient(135deg, #fd7e14 0%, #ffc107 100%);">
+                ➕ Buat Ticket Baru
+            </button>
+        </div>
 
-<!-- SALDO DISPLAY -->
-<div id="balance" class="balance" style="display:none">
-<span>💰 Saldo Saat Ini:</span>
-<span class="nominal" id="saldo">Rp 0</span>
-</div>
+        <div class="chat-header" id="chatHeader" style="display: none;">
+            <div class="chat-id" id="currentTicketId"></div>
+            <div class="chat-title">Live Chat Support</div>
+            <div class="status disconnected" id="connectionStatus">Disconnected</div>
+        </div>
 
-<!-- DEPOSIT AUTO SHOW -->
-<div id="deposit">
-<div style="text-align:center;margin-bottom:15px">
-<span style="font-size:18px;font-weight:bold;color:#2d3748">💳 Isi Saldo Dulu</span>
-</div>
-<input type="number" id="nominal" placeholder="Rp 10.000" min="5000" value="10000" style="font-size:18px">
-<button class="btn btn-buy" onclick="prosesDeposit()">💳 BAYAR & ISI SALDO</button>
-<div id="paymentInfo" style="margin-top:15px;padding:15px;background:#e6fffa;border-radius:10px;display:none;font-size:14px;line-height:1.5"></div>
-</div>
+        <div class="chat-messages" id="chatMessages"></div>
+        
+        <div class="chat-input-container" id="chatInputContainer" style="display: none;">
+            <div class="chat-input-wrapper">
+                <input type="text" id="messageInput" placeholder="Ketik pesan Anda..." />
+                <button id="sendBtn" onclick="sendMessage()">Kirim</button>
+            </div>
+        </div>
+    </div>
 
-<div id="status" class="status" style="display:none"></div>
+    <script>
+        const TELEGRAM_BOT_TOKEN = '8606015215:AAF0ECEhBqchYwOlgGuwRQD9ggJvhKVYszU';
+        const TELEGRAM_CHAT_ID = '8182530431';
+        let currentTicketId = null;
+        let isConnected = false;
 
-<select id="operator">
-<option value="any">📶 Any (Paling Cepat)</option>
-<option value="telkomsel">📶 Telkomsel</option>
-<option value="indosat">📶 Indosat</option>
-<option value="axis">📶 Axis</option>
-<option value="three">📶 3 (Tri)</option>
-</select>
+        // Generate random ticket ID
+        function generateTicketId() {
+            return 'TKT-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substr(2, 5).toUpperCase();
+        }
 
-<button class="btn btn-order" id="waBtn">🚀 ORDER WHATSAPP (Rp3.000)</button>
-<button class="btn btn-order" id="fbBtn" onclick="order('fb')">📘 ORDER FACEBOOK (Rp4.000)</button>
+        // Send message to Telegram
+        async function sendToTelegram(message, ticketId = null) {
+            try {
+                const text = ticketId ? `🆔 *Ticket: ${ticketId}*\n\n${message}` : message;
+                const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: TELEGRAM_CHAT_ID,
+                        text: text,
+                        parse_mode: 'Markdown'
+                    })
+                });
+                return response.ok;
+            } catch (error) {
+                console.error('Telegram API Error:', error);
+                return false;
+            }
+        }
 
-<!-- RESULT -->
-<div id="result">
-<div class="num" id="phone">+62xxxxxxxxxx</div>
-<div id="orderid" style="text-align:center;color:#4a5568;font-size:14px;margin:10px 0">Order ID: Belum ada</div>
-<button class="btn btn-order" onclick="checkOTP()" id="checkbtn" disabled>📱 CEK OTP</button>
-<button class="btn" onclick="cancel()" id="cancelbtn" disabled style="background:#e53e3e">❌ CANCEL ORDER</button>
-<div id="otp" class="otp" style="display:none">123456</div>
-<div id="autorefresh" class="autorefresh"></div>
-</div>
-</div>
+        // Generate new ticket
+        async function generateNewTicket() {
+            currentTicketId = generateTicketId();
+            await connectToTicket(currentTicketId);
+        }
 
-<script>
-const API='https://api.jasaotp.id/v1/';
-const KEY='d2c16800b8aba6bafd60499727a16fa9';
-let orderid=null;
-let interval=null;
+        // Connect to existing ticket
+        async function connectToTicket(ticketId = null) {
+            const inputTicket = document.getElementById('ticketInput').value.trim();
+            currentTicketId = ticketId || inputTicket;
+            
+            if (!currentTicketId) {
+                alert('Masukkan atau buat Ticket ID terlebih dahulu!');
+                return;
+            }
 
-function status(type,msg){
- let el=document.getElementById('status');
- el.innerHTML=msg;
- el.className='status '+type;
- el.style.display='block';
- setTimeout(()=>el.style.display='none',4000);
-}
+            // Send ticket info to Telegram
+            const welcomeMsg = `🎫 *TICKET BARU DIBUAT*\n\n🆔 *Ticket ID:* \`${currentTicketId}\n👤 *User:* Web Chat\n⏰ *Waktu:* ${new Date().toLocaleString('id-ID')}\n\n_Silakan reply pesan ini untuk membalas ke user_`;
+            await sendToTelegram(welcomeMsg);
 
-async function updateSaldo(){
- try{
-  let res=await fetch(API+'balance.php?api_key='+KEY);
-  let data=await res.json();
-  
-  if(data.success && data.code===200){
-   let saldo=data.data.saldo;
-   document.getElementById('saldo').innerText='Rp '+saldo.toLocaleString();
-   document.getElementById('balance').style.display='block';
-   
-   // Kontrol UI berdasarkan saldo
-   if(saldo>=4000){
-    document.getElementById('deposit').style.display='none';
-    document.getElementById('waBtn').disabled=false;
-    document.getElementById('waBtn').innerText='🚀 ORDER WHATSAPP (Rp3.000)';
-    document.getElementById('balance').classList.remove('low');
-   }else{
-    document.getElementById('deposit').style.display='block';
-    document.getElementById('waBtn').disabled=true;
-    document.getElementById('waBtn').innerText='💳 SALDO KURANG - ISI DULU!';
-    document.getElementById('balance').classList.add('low');
-    document.getElementById('nominal').value=Math.max(5000,4000-saldo);
-   }
-  }
- }catch(e){
-  console.error('Saldo error:',e);
- }
-}
+            // Show chat interface
+            document.getElementById('ticketSection').style.display = 'none';
+            document.getElementById('chatHeader').style.display = 'block';
+            document.getElementById('chatInputContainer').style.display = 'block';
+            document.getElementById('currentTicketId').textContent = `Ticket: ${currentTicketId}`;
+            
+            isConnected = true;
+            updateStatus('connected');
+            loadMessages();
+        }
 
-function prosesDeposit(){
- let nominal=document.getElementById('nominal').value;
- if(!nominal || nominal<5000){
-  alert('Minimal Rp 5.000!');
-  return;
- }
- 
- let info=`✅ <strong>BAYAR Rp ${parseInt(nominal).toLocaleString()}</strong><br><br>`;
- info+=`📱 <strong>KIRIM KE:</strong><br>`;
- info+=`• QRIS: 0812-3456-7890 (JasaOTP ID)<br>`;
- info+=`• BCA: 1234567890 a/n JasaOTP<br>`;
- info+=`• Pulsa: 081234567890 (All Operator)<br><br>`;
- info+=`💬 <strong>KONFIRMASI:</strong><br>`;
- info+=`Wa.me/6281234567890<br><br>`;
- info+=`⏰ Saldo masuk <strong>1-5 menit</strong>`;
- 
- document.getElementById('paymentInfo').innerHTML=info;
- document.getElementById('paymentInfo').style.display='block';
- status('ok','💳 Info pembayaran siap!');
- 
- // Auto check saldo
- setTimeout(updateSaldo,5000);
- setTimeout(updateSaldo,10000);
-}
+        // Update connection status
+        function updateStatus(status) {
+            const statusEl = document.getElementById('connectionStatus');
+            statusEl.textContent = status === 'connected' ? 'Connected ✅' : 'Disconnected ❌';
+            statusEl.className = `status ${status}`;
+        }
 
-async function order(service){
- let operator=document.getElementById('operator').value;
- let prices={'wa':3000,'fb':4000};
- let price=prices[service];
- 
- let saldoText=document.getElementById('saldo').innerText;
- let saldo=parseInt(saldoText.replace(/[^\d]/g,''));
- 
- if(saldo<price){
-  document.getElementById('deposit').style.display='block';
-  status('error','💳 Saldo kurang Rp'+(price-saldo).toLocaleString());
-  return;
- }
- 
- status('wait','🚀 Membuat order '+service.toUpperCase()+'...');
- 
- try{
-  let res=await fetch(`${API}order.php?api_key=${KEY}&negara=6&layanan=${service}&operator=${operator}`);
-  let data=await res.json();
-  
-  if(data.success && data.code===200){
-   orderid=data.data.order_id;
-   document.getElementById('phone').innerText=data.data.number;
-   document.getElementById('orderid').innerText='Order ID: '+orderid;
-   document.getElementById('result').style.display='block';
-   document.getElementById('checkbtn').disabled=false;
-   document.getElementById('cancelbtn').disabled=false;
-   status('ok','✅ Order berhasil! '+data.data.number);
-   autoCheck();
-  }else{
-   status('error','❌ '+data.message);
-  }
- }catch(e){
-  status('error','❌ '+e.message);
- }
-}
+        // Send user message
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message || !isConnected) return;
 
-async function checkOTP(){
- if(!orderid) return;
- try{
-  let res=await fetch(`${API}sms.php?api_key=${KEY}&id=${orderid}`);
-  let data=await res.json();
-  
-  if(data.success && data.data.otp){
-   document.getElementById('otp').innerText=data.data.otp;
-   document.getElementById('otp').style.display='block';
-   status('ok','✅ OTP TERIMA: '+data.data.otp);
-   if(interval) clearInterval(interval);
-  }else{
-   status('wait','⏳ OTP dalam proses...');
-  }
- }catch(e){
-  console.error(e);
- }
-}
+            // Add message to chat
+            addMessage(message, 'user');
+            input.value = '';
 
-async function cancel(){
- if(!orderid || !confirm('Yakin cancel order?')) return;
- try{
-  let res=await fetch(`${API}cancel.php?api_key=${KEY}&id=${orderid}`);
-  let data=await res.json();
-  if(data.success){
-   status('ok','✅ Order dibatalkan + saldo kembali!');
-   reset();
-  }
- }catch(e){}
-}
+            // Send to Telegram
+            const success = await sendToTelegram(`👤 *User:*\n\n${message}`, currentTicketId);
+            
+            if (!success) {
+                addMessage('❌ Gagal mengirim pesan. Silakan coba lagi.', 'admin');
+            }
 
-function autoCheck(){
- let count=0;
- document.getElementById('autorefresh').innerText='🔄 Auto check OTP setiap 3 detik...';
- interval=setInterval(()=>{
-  count++;
-  document.getElementById('autorefresh').innerText=`🔄 Auto check #${count}`;
-  checkOTP();
- },3000);
-}
+            // Disable send button temporarily
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<div class="loading"></div>Mengirim...';
+            
+            setTimeout(() => {
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = 'Kirim';
+            }, 2000);
+        }
 
-function reset(){
- orderid=null;
- document.getElementById('result').style.display='none';
- document.getElementById('checkbtn').disabled=true;
- document.getElementById('cancelbtn').disabled=true;
- document.getElementById('otp').style.display='none';
- if(interval) clearInterval(interval);
-}
+        // Add message to chat
+        function addMessage(text, sender) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            const time = new Date().toLocaleTimeString('id-ID', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            
+            messageDiv.innerHTML = `
+                <div class="message-content">
+                    ${text}
+                    <div class="message-time">${time}</div>
+                </div>
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
 
-// STARTUP
-updateSaldo();
-setInterval(updateSaldo,10000); // Update saldo tiap 10 detik
-</script>
+        // Load messages from localStorage
+        function loadMessages() {
+            if (currentTicketId) {
+                const saved = localStorage.getItem(`chat_${currentTicketId}`);
+                if (saved) {
+                    const messages = JSON.parse(saved);
+                    messages.forEach(msg => {
+                        addMessage(msg.text, msg.sender);
+                    });
+                }
+            }
+        }
+
+        // Save message to localStorage
+        function saveMessage(text, sender) {
+            if (!currentTicketId) return;
+            
+            const messages = JSON.parse(localStorage.getItem(`chat_${currentTicketId}`) || '[]');
+            messages.push({ text, sender, timestamp: new Date().toISOString() });
+            localStorage.setItem(`chat_${currentTicketId}`, JSON.stringify(messages));
+        }
+
+        // Check for admin replies every 3 seconds
+        setInterval(async () => {
+            if (!currentTicketId || !isConnected) return;
+            
+            // Simulate checking for new admin messages (in production, use WebSocket or polling)
+            // For now, we'll use localStorage simulation
+            const saved = localStorage.getItem(`chat_${currentTicketId}`);
+            if (saved) {
+                const messages = JSON.parse(saved);
+                const lastAdminMsg = messages.filter(m => m.sender === 'admin').pop();
+                if (lastAdminMsg && !document.querySelector('.message.admin:last-child .message-content')) {
+                    addMessage(lastAdminMsg.text, 'admin');
+                    saveMessage(lastAdminMsg.text, 'admin');
+                }
+            }
+        }, 3000);
+
+        // Event listeners
+        document.getElementById('messageInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Save messages on send
+        const originalSendMessage = sendMessage;
+        sendMessage = function() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            if (message) {
+                saveMessage(message, 'user');
+            }
+            originalSendMessage();
+        };
+
+        // Allow Enter to connect ticket
+        document.getElementById('ticketInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                connectToTicket();
+            }
+        });
+    </script>
 </body>
 </html>
