@@ -3,396 +3,255 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Chat Support - 2 Way</title>
+    <title>Live Chat - FIX REPLY</title>
     <style>
-        /* [SAME CSS AS BEFORE - COPY DARI VERSI SEBELUMNYA] */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        /* [SAME CSS - potong untuk singkat] */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            height: 100vh; display: flex; justify-content: center; align-items: center;
         }
         .chat-container {
-            width: 90%;
-            max-width: 800px;
-            height: 90vh;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
+            width: 90%; max-width: 800px; height: 90vh; background: white;
+            border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            display: flex; flex-direction: column; overflow: hidden;
         }
-        .chat-header {
+        .chat-header { 
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            text-align: center;
-            position: relative;
+            color: white; padding: 20px; text-align: center;
         }
-        .chat-id {
-            font-size: 14px;
-            opacity: 0.9;
-            margin-bottom: 5px;
+        .chat-id { font-size: 14px; opacity: 0.9; margin-bottom: 5px; }
+        .chat-title { font-size: 24px; font-weight: 600; }
+        .status { padding: 5px 0; font-size: 12px; }
+        .status.connected { color: #28a745; }
+        .status.polling { color: #007bff; }
+        .chat-messages { 
+            flex: 1; padding: 20px; overflow-y: auto; background: #f8f9fa;
         }
-        .chat-title {
-            font-size: 24px;
-            font-weight: 600;
-        }
-        .chat-messages {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            background: #f8f9fa;
-        }
-        .message {
-            margin-bottom: 15px;
-            display: flex;
-            animation: fadeIn 0.3s ease-in;
-        }
-        .message.user {
-            justify-content: flex-end;
-        }
-        .message-content {
-            max-width: 70%;
-            padding: 12px 16px;
-            border-radius: 18px;
-            position: relative;
+        .message { margin-bottom: 15px; display: flex; }
+        .message.user { justify-content: flex-end; }
+        .message.admin { justify-content: flex-start; }
+        .message-content { 
+            max-width: 70%; padding: 12px 16px; border-radius: 18px;
         }
         .message.user .message-content {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-bottom-right-radius: 5px;
+            color: white; border-bottom-right-radius: 5px;
         }
         .message.admin .message-content {
-            background: white;
-            color: #333;
-            border: 1px solid #e1e5e9;
-            border-bottom-left-radius: 5px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            background: white; border: 1px solid #e1e5e9;
+            border-bottom-left-radius: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
-        .message-time {
-            font-size: 11px;
-            opacity: 0.7;
-            margin-top: 5px;
+        .message-time { font-size: 11px; opacity: 0.7; margin-top: 5px; }
+        .chat-input-container { padding: 20px; background: white; border-top: 1px solid #e1e5e9; }
+        .chat-input-wrapper { display: flex; gap: 10px; }
+        #messageInput { 
+            flex: 1; padding: 12px 16px; border: 2px solid #e1e5e9;
+            border-radius: 25px; outline: none;
         }
-        .chat-input-container {
-            padding: 20px;
-            background: white;
-            border-top: 1px solid #e1e5e9;
+        #messageInput:focus { border-color: #667eea; }
+        #sendBtn { 
+            padding: 12px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; border: none; border-radius: 25px; cursor: pointer;
         }
-        .chat-input-wrapper {
-            display: flex;
-            gap: 10px;
-            align-items: flex-end;
+        .ticket-section { background: #f8f9fa; padding: 20px; text-align: center; }
+        .ticket-input { 
+            width: 100%; padding: 12px; border: 2px solid #e1e5e9;
+            border-radius: 10px; margin-bottom: 10px; font-size: 16px;
         }
-        #messageInput {
-            flex: 1;
-            padding: 12px 16px;
-            border: 2px solid #e1e5e9;
-            border-radius: 25px;
-            font-size: 14px;
-            outline: none;
-            transition: all 0.3s ease;
+        .generate-btn { 
+            width: 100%; padding: 12px; color: white; border: none;
+            border-radius: 10px; font-size: 16px; cursor: pointer; margin-bottom: 10px;
         }
-        #messageInput:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        .connect-btn { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); }
+        .new-btn { background: linear-gradient(135deg, #fd7e14 0%, #ffc107 100%); }
+        .telegram-instruction {
+            background: #e3f2fd; border: 1px solid #2196f3; color: #1976d2;
+            padding: 15px; border-radius: 10px; margin-top: 15px; font-size: 14px;
         }
-        #sendBtn {
-            padding: 12px 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.3s ease;
+        .debug-info { 
+            background: #fff3cd; border: 1px solid #ffc107; color: #856404;
+            padding: 10px; border-radius: 5px; font-size: 12px; margin-top: 10px;
         }
-        #sendBtn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-        #sendBtn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-        .ticket-section {
-            background: #f8f9fa;
-            padding: 20px;
-            border-bottom: 1px solid #e1e5e9;
-        }
-        .ticket-input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e1e5e9;
-            border-radius: 10px;
-            font-size: 16px;
-            margin-bottom: 10px;
-            outline: none;
-        }
-        .ticket-input:focus {
-            border-color: #667eea;
-        }
-        .generate-btn {
-            width: 100%;
-            padding: 12px;
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 10px;
-        }
-        .generate-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
-        }
-        .status {
-            text-align: center;
-            padding: 10px;
-            font-size: 14px;
-            font-weight: 500;
-        }
-        .status.connected {
-            color: #28a745;
-            background: rgba(40, 167, 69, 0.1);
-        }
-        .status.polling {
-            color: #007bff;
-            background: rgba(0, 123, 255, 0.1);
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-right: 10px;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .telegram-notice {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            color: #856404;
-            padding: 10px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            font-size: 13px;
-        }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .pulse { animation: pulse 2s infinite; }
     </style>
 </head>
 <body>
     <div class="chat-container">
         <div class="ticket-section" id="ticketSection">
             <h3 style="margin-bottom: 15px; color: #333;">🎫 Live Chat Support</h3>
-            <input type="text" class="ticket-input" id="ticketInput" placeholder="Masukkan Ticket ID..." />
-            <button class="generate-btn" onclick="connectToTicket()">🔗 Connect Ticket</button>
-            <button class="generate-btn" onclick="generateNewTicket()" style="background: linear-gradient(135deg, #fd7e14 0%, #ffc107 100%);">
+            <input type="text" class="ticket-input" id="ticketInput" placeholder="Paste Ticket ID di sini..." />
+            <button class="generate-btn connect-btn" onclick="connectToTicket()">
+                🔗 Connect ke Ticket
+            </button>
+            <button class="generate-btn new-btn" onclick="generateNewTicket()">
                 ➕ Buat Ticket Baru
             </button>
-            <div class="telegram-notice" style="margin-top: 15px;">
-                📱 <strong>Reply di Telegram:</strong> Reply pesan ticket untuk kirim balasan ke user ini!
+            
+            <div class="telegram-instruction">
+                <strong>📱 CARA REPLY DI TELEGRAM:</strong><br>
+                1. <strong>TEPTEK LAMATAN</strong> pesan bot (panah ←)<br>
+                2. Ketik balasan ANDA<br>
+                3. <strong>KIRIM</strong><br><br>
+                <strong>✅ Reply = INSTAN ke web | ❌ Forward/Balas biasa = TIDAK JADI</strong>
             </div>
+            
+            <div class="debug-info" id="debugInfo" style="display: none;"></div>
         </div>
 
         <div class="chat-header" id="chatHeader" style="display: none;">
             <div class="chat-id" id="currentTicketId"></div>
-            <div class="chat-title">Live Support Agent</div>
+            <div class="chat-title">Live Agent <span class="pulse">●</span></div>
             <div class="status" id="connectionStatus">Disconnected</div>
         </div>
 
-        <div class="chat-messages" id="chatMessages">
-            <div style="text-align: center; color: #666; padding: 20px;">
-                Mulai chat dengan membuat ticket baru atau connect ke ticket existing
-            </div>
-        </div>
-        
+        <div class="chat-messages" id="chatMessages"></div>
         <div class="chat-input-container" id="chatInputContainer" style="display: none;">
             <div class="chat-input-wrapper">
-                <input type="text" id="messageInput" placeholder="Ketik pesan Anda..." />
+                <input type="text" id="messageInput" placeholder="Ketik pesan..." />
                 <button id="sendBtn" onclick="sendMessage()">Kirim</button>
             </div>
         </div>
     </div>
 
     <script>
-        const TELEGRAM_BOT_TOKEN = '8606015215:AAF0ECEhBqchYwOlgGuwRQD9ggJvhKVYszU';
-        const TELEGRAM_CHAT_ID = '8182530431';
+        const BOT_TOKEN = '8606015215:AAF0ECEhBqchYwOlgGuwRQD9ggJvhKVYszU';
+        const CHAT_ID = '8182530431';
         let currentTicketId = null;
-        let isConnected = false;
         let lastUpdateId = 0;
-        let pollingInterval = null;
+        let pollingActive = false;
 
-        // Generate ticket ID
+        // Generate ID
         function generateTicketId() {
-            return 'TKT-' + Date.now().toString(36).toUpperCase() + '-' + 
-                   Math.random().toString(36).substr(2, 5).toUpperCase();
+            return 'TKT-' + Date.now().toString(36).toUpperCase().slice(-6) + 
+                   Math.random().toString(36).substr(2, 6).toUpperCase();
         }
 
         // Send to Telegram
-        async function sendToTelegram(message, ticketId = null, replyToMessageId = null) {
+        async function sendToTelegram(text, ticketId = null) {
             try {
-                const text = ticketId ? `🆔 *Ticket: ${ticketId}*\n\n${message}` : message;
-                const payload = {
-                    chat_id: TELEGRAM_CHAT_ID,
-                    text: text,
-                    parse_mode: 'Markdown'
-                };
+                const fullText = ticketId ? `🆔 *Ticket: ${ticketId}*\n\n${text}` : text;
+                const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
                 
-                if (replyToMessageId) {
-                    payload.reply_to_message_id = replyToMessageId;
-                }
-                
-                const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
                 const response = await fetch(url, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        chat_id: CHAT_ID,
+                        text: fullText,
+                        parse_mode: 'Markdown'
+                    })
                 });
-                return response.ok;
-            } catch (error) {
-                console.error('Telegram Error:', error);
+                
+                const data = await response.json();
+                logDebug(`Sent to TG: ${fullText.substring(0, 50)}...`);
+                return data.ok;
+            } catch(e) {
+                logDebug('TG Send Error: ' + e.message);
                 return false;
             }
         }
 
-        // Get Telegram updates (POLLING)
-        async function getTelegramUpdates() {
+        // Get Telegram updates - FIXED FOR REPLIES
+        async function pollTelegram() {
+            if (!pollingActive || !currentTicketId) return;
+            
             try {
-                const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getUpdates?offset=${lastUpdateId + 1}&timeout=30`;
+                const url = `https://api.telegram.org/bot${BOT_TOKEN}/getUpdates?offset=${lastUpdateId + 1}&timeout=10`;
                 const response = await fetch(url);
                 const data = await response.json();
                 
-                if (data.ok && data.result.length > 0) {
+                if (data.ok) {
                     for (let update of data.result) {
                         lastUpdateId = update.update_id;
-                        await processTelegramUpdate(update);
+                        await handleTelegramMessage(update.message);
                     }
                 }
-            } catch (error) {
-                console.error('Polling error:', error);
+            } catch(e) {
+                logDebug('Poll error: ' + e.message);
             }
         }
 
-        // Process Telegram updates
-        async function processTelegramUpdate(update) {
-            if (update.message && update.message.chat.id.toString() === TELEGRAM_CHAT_ID) {
-                const message = update.message.text || '';
-                const messageId = update.message.message_id;
+        // Handle incoming Telegram messages - FIXED
+        async function handleTelegramMessage(message) {
+            if (!message || message.chat.id.toString() !== CHAT_ID) return;
+            
+            const text = message.text || '';
+            logDebug(`TG Message: ${text.substring(0, 100)}...`);
+            
+            // Check if it's a reply to our bot message containing ticket
+            if (message.reply_to_message && message.reply_to_message.from.is_bot) {
+                const repliedText = message.reply_to_message.text || '';
+                const ticketMatch = repliedText.match(/🆔\s*Ticket:\s*([TKT\-A-Z0-9]+)/i);
                 
-                // Check if message contains ticket ID
-                const ticketMatch = message.match(/🆔\s*Ticket:\s*([A-Z0-9\-]+)/i);
-                if (ticketMatch && currentTicketId === ticketMatch[1]) {
-                    // This is a reply for current ticket!
-                    const replyText = message.replace(/🆔\s*Ticket:\s*[A-Z0-9\-]+[\s\S]*/i, '').trim();
-                    if (replyText) {
+                if (ticketMatch && ticketMatch[1] === currentTicketId) {
+                    // YES! This is reply for current ticket
+                    const replyText = text.trim();
+                    if (replyText && replyText.length > 0) {
                         addMessage(replyText, 'admin');
                         saveMessage(replyText, 'admin');
-                        
-                        // Show notification
-                        showNotification('💬 Balasan dari Admin diterima!');
+                        logDebug(`✅ REPLY DETECTED for ${currentTicketId}`);
                     }
                 }
-            }
-        }
-
-        // Start polling
-        function startPolling() {
-            if (pollingInterval) clearInterval(pollingInterval);
-            getTelegramUpdates(); // First check
-            pollingInterval = setInterval(getTelegramUpdates, 2000); // Check every 2 seconds
-            updateStatus('polling');
-        }
-
-        // Stop polling
-        function stopPolling() {
-            if (pollingInterval) {
-                clearInterval(pollingInterval);
-                pollingInterval = null;
             }
         }
 
         // Connect ticket
-        async function connectToTicket(ticketId = null) {
-            const inputTicket = document.getElementById('ticketInput').value.trim();
-            currentTicketId = ticketId || inputTicket;
+        async function connectToTicket() {
+            const ticketInput = document.getElementById('ticketInput').value.trim();
+            currentTicketId = ticketInput || generateTicketId();
+            document.getElementById('ticketInput').value = currentTicketId;
             
-            if (!currentTicketId) {
-                alert('❌ Masukkan Ticket ID!');
-                return;
-            }
-
-            // Send connection message
-            const connectMsg = `🔗 *TICKET CONNECTED*\n\n🆔 *Ticket:* \`${currentTicketId}\n👤 *User:* Web Chat\n⏰ *Waktu:* ${new Date().toLocaleString('id-ID')}\n\n*REPLY pesan ini untuk kirim balasan ke user!*`;
-            await sendToTelegram(connectMsg);
-
-            // Show interface
-            document.getElementById('ticketSection').style.display = 'none';
-            document.getElementById('chatHeader').style.display = 'block';
-            document.getElementById('chatInputContainer').style.display = 'block';
-            document.getElementById('currentTicketId').textContent = `Ticket: ${currentTicketId}`;
+            // Send welcome message
+            const welcome = `🎫 *NEW TICKET*\n🆔 *ID:* \`${currentTicketId}\`\n⏰ ${new Date().toLocaleString('id-ID')}\n\n*REPLY pesan ini untuk balas user!*`;
+            await sendToTelegram(welcome, currentTicketId);
             
-            isConnected = true;
+            showChat();
             startPolling();
             loadMessages();
         }
 
-        // Generate new ticket
+        // Generate new
         async function generateNewTicket() {
             currentTicketId = generateTicketId();
             document.getElementById('ticketInput').value = currentTicketId;
-            await connectToTicket(currentTicketId);
+            await connectToTicket();
+        }
+
+        // Show chat UI
+        function showChat() {
+            document.getElementById('ticketSection').style.display = 'none';
+            document.getElementById('chatHeader').style.display = 'block';
+            document.getElementById('chatInputContainer').style.display = 'block';
+            document.getElementById('currentTicketId').textContent = `Ticket: ${currentTicketId}`;
+            updateStatus('polling');
         }
 
         // Send user message
         async function sendMessage() {
             const input = document.getElementById('messageInput');
-            const message = input.value.trim();
+            const msg = input.value.trim();
+            if (!msg) return;
             
-            if (!message || !isConnected) return;
-
-            addMessage(message, 'user');
-            saveMessage(message, 'user');
+            addMessage(msg, 'user');
+            saveMessage(msg, 'user');
             input.value = '';
-
-            // Send to Telegram
-            const success = await sendToTelegram(message, currentTicketId);
-            if (!success) {
-                addMessage('❌ Gagal kirim. Coba lagi!', 'admin');
-            }
+            
+            await sendToTelegram(msg, currentTicketId);
         }
 
-        // Add message
+        // Add message UI
         function addMessage(text, sender) {
             const container = document.getElementById('chatMessages');
             const div = document.createElement('div');
             div.className = `message ${sender}`;
-            const time = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            const time = new Date().toLocaleTimeString('id-ID', {hour: '2-digit', minute: '2-digit'});
             
             div.innerHTML = `
                 <div class="message-content">
-                    ${text}
+                    ${text.replace(/\*/g, '')}
                     <div class="message-time">${time}</div>
                 </div>
             `;
@@ -400,62 +259,52 @@
             container.scrollTop = container.scrollHeight;
         }
 
-        // Notification
-        function showNotification(text) {
-            // Simple visual feedback
-            const lastMsg = document.querySelector('.message.admin:last-child .message-content');
-            if (lastMsg) {
-                lastMsg.style.background = '#d4edda';
-                lastMsg.style.borderColor = '#c3e6cb';
-                setTimeout(() => {
-                    lastMsg.style.background = '';
-                    lastMsg.style.borderColor = '';
-                }, 2000);
-            }
-        }
-
-        // LocalStorage functions
+        // LocalStorage
         function saveMessage(text, sender) {
-            if (!currentTicketId) return;
-            const messages = JSON.parse(localStorage.getItem(`chat_${currentTicketId}`) || '[]');
-            messages.push({ text, sender, timestamp: new Date().toISOString() });
-            localStorage.setItem(`chat_${currentTicketId}`, JSON.stringify(messages));
+            const key = `chat_${currentTicketId}`;
+            const chats = JSON.parse(localStorage.getItem(key) || '[]');
+            chats.push({text, sender, time: new Date().toISOString()});
+            localStorage.setItem(key, JSON.stringify(chats));
         }
 
         function loadMessages() {
-            if (!currentTicketId) return;
-            const saved = localStorage.getItem(`chat_${currentTicketId}`);
+            const key = `chat_${currentTicketId}`;
+            const saved = localStorage.getItem(key);
             if (saved) {
-                JSON.parse(saved).forEach(msg => {
-                    addMessage(msg.text, msg.sender);
-                });
+                JSON.parse(saved).forEach(msg => addMessage(msg.text, msg.sender));
             }
         }
 
-        // Status update
+        // Polling control
+        function startPolling() {
+            pollingActive = true;
+            pollTelegram();
+            setInterval(pollTelegram, 1500); // Check every 1.5s
+        }
+
+        // Status
         function updateStatus(status) {
             const el = document.getElementById('connectionStatus');
-            const texts = {
-                'connected': 'Connected ✅',
-                'polling': 'Polling Telegram... 🔄',
-                'disconnected': 'Disconnected ❌'
-            };
-            el.textContent = texts[status] || texts.disconnected;
+            el.textContent = status === 'polling' ? '🔄 Menunggu reply Telegram...' : 'Connected';
             el.className = `status ${status}`;
         }
 
-        // Event listeners
-        document.getElementById('messageInput').addEventListener('keypress', (e) => {
+        // Debug
+        function logDebug(msg) {
+            console.log(msg);
+            const debugEl = document.getElementById('debugInfo');
+            debugEl.style.display = 'block';
+            debugEl.innerHTML = `${new Date().toLocaleTimeString()}: ${msg}<br>` + 
+                               debugEl.innerHTML;
+            setTimeout(() => debugEl.style.display = 'none', 5000);
+        }
+
+        // Events
+        document.getElementById('messageInput').addEventListener('keypress', e => {
             if (e.key === 'Enter') sendMessage();
         });
-
-        document.getElementById('ticketInput').addEventListener('keypress', (e) => {
+        document.getElementById('ticketInput').addEventListener('keypress', e => {
             if (e.key === 'Enter') connectToTicket();
-        });
-
-        // Page unload cleanup
-        window.addEventListener('beforeunload', () => {
-            stopPolling();
         });
     </script>
 </body>
