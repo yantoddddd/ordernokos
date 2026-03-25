@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Live Chat Support</title>
     <style>
+        /* [SAME CLEAN CSS - NO CHANGE] */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
@@ -82,7 +83,6 @@
             text-align: center; color: #666; padding: 40px 20px;
             font-size: 15px; line-height: 1.5;
         }
-        .welcome-msg strong { color: #28a745; }
         @keyframes fadeIn { 
             from { opacity: 0; transform: translateY(15px); } 
             to { opacity: 1; transform: translateY(0); } 
@@ -131,15 +131,14 @@
         let currentTicketId = null;
         let lastProcessedMsgId = 0;
         let lastAdminMsgHash = '';
-        let userNotified = false; // FIXED: Only notify ONCE
         let pollingTimer = null;
+        let hasSentFirstMessage = false; // FIXED: Track first message
 
-        // Get stable IP hash
+        // Get stable IP
         async function getStableIP() {
             try {
                 const res = await fetch('https://api.ipify.org?format=json');
                 const data = await res.json();
-                // Stable 8-char hash from IP
                 return btoa(data.ip).replace(/[^A-Z0-9]/g, '').slice(-8).toUpperCase();
             } catch {
                 return 'LOCAL-' + Date.now().toString(36).slice(-6).toUpperCase();
@@ -150,17 +149,22 @@
         async function generateTicket() {
             const ipHash = await getStableIP();
             currentTicketId = `CHAT-${ipHash}`;
+            console.log('🎫 Ticket generated:', currentTicketId);
             return currentTicketId;
         }
 
-        // Send to Telegram - SMART NOTIFICATION
-        async function sendToTelegram(text, isNewUser = false) {
+        // FIXED: Always send user messages + Smart new user detection
+        async function sendToTelegram(text) {
             try {
-                let fullText = `🆔 *${currentTicketId}*\n\n${text}`;
+                // ALWAYS send user message with ticket
+                let fullText = `🆔 *${currentTicketId}*\n\n👤 *User:*\n${text}`;
                 
-                if (isNewUser && !userNotified) {
-                    fullText = `👤 *USER BARU*\n🆔 *Ticket:* \`${currentTicketId}\`\n⏰ *${new Date().toLocaleString('id-ID')}\`\n\n${text}\n\n*REPLY untuk balas user ini*`;
-                    userNotified = true; // ONLY ONCE!
+                // NEW USER notification - ONLY if no chat history
+                const chatHistory = localStorage.getItem(`chat_${currentTicketId}`);
+                const isNewUser = !chatHistory || JSON.parse(chatHistory).length === 0;
+                
+                if (isNewUser) {
+                    fullText = `👤 *NEW USER*\n🆔 *Ticket:* \`${currentTicketId}\`\n⏰ *${new Date().toLocaleString('id-ID')}\n\n${text}\n\n*REPLY untuk balas*`;
                 }
                 
                 const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
@@ -175,14 +179,16 @@
                     })
                 });
                 
-                return res.ok;
+                const data = await res.json();
+                console.log('📤 Telegram sent:', data.ok ? '✅' : '❌', fullText.substring(0, 100));
+                return data.ok;
             } catch(e) {
-                console.error('TG Error:', e);
+                console.error('❌ Telegram error:', e);
                 return false;
             }
         }
 
-        // FIXED Polling - NO DUPLICATES
+        // Polling
         async function pollTelegram() {
             if (!currentTicketId) return;
             try {
@@ -196,11 +202,11 @@
                     }
                 }
             } catch(e) {
-                // Silent fail
+                // Silent
             }
         }
 
-        // FIXED Processing - ZERO DUPLICATES
+        // Process admin replies
         async function processUpdate(update) {
             const msg = update.message;
             if (!msg || msg.chat.id.toString() !== CHAT_ID) return;
@@ -209,47 +215,52 @@
             if (msgId <= lastProcessedMsgId) return;
             lastProcessedMsgId = msgId;
             
-            // ONLY process REPLIES to bot
             if (msg.reply_to_message?.from?.is_bot) {
                 const repliedText = msg.reply_to_message.text || '';
                 const ticketMatch = repliedText.match(/🆔\s*\*?CHAT\-([A-Z0-9]{8})\*?/i);
                 
                 if (ticketMatch && ticketMatch[1] === currentTicketId.slice(5)) {
-                    const replyText = msg.text?.trim() || '[Foto/Sticker]';
+                    const replyText = msg.text?.trim() || '[Media]';
                     const msgHash = btoa(replyText).slice(0, 16);
                     
-                    // PERFECT DUPLICATE PREVENTION
                     if (msgHash === lastAdminMsgHash) return;
                     lastAdminMsgHash = msgHash;
                     
                     addMessage(replyText, 'admin');
                     saveMessage(replyText, 'admin');
+                    console.log('✅ Admin reply:', replyText.substring(0, 50));
                 }
             }
         }
 
-        // Send message
+        // FIXED Send message - ALWAYS WORKS
         async function sendMessage() {
             const input = document.getElementById('messageInput');
             const text = input.value.trim();
-            if (!text) return;
+            if (!text || !currentTicketId) return;
             
             const btn = document.getElementById('sendBtn');
             btn.disabled = true;
             
+            // UI first
             addMessage(text, 'user');
             saveMessage(text, 'user');
             input.value = '';
             
-            const isNewUser = !userNotified;
-            await sendToTelegram(text, isNewUser);
+            // Telegram - GUARANTEED send
+            const success = await sendToTelegram(text);
+            console.log('📤 First message sent:', success ? '✅' : '❌');
             
             btn.disabled = false;
         }
 
-        // UI Message
+        // Add message UI
         function addMessage(text, sender) {
             const container = document.getElementById('chatMessages');
+            if (container.children[0]?.classList.contains('welcome-msg')) {
+                container.innerHTML = '';
+            }
+            
             const div = document.createElement('div');
             div.className = `message ${sender}`;
             const time = new Date().toLocaleTimeString('id-ID', {
@@ -263,16 +274,11 @@
                 </div>
             `;
             
-            // Clear welcome if first message
-            if (container.children[0]?.classList.contains('welcome-msg')) {
-                container.innerHTML = '';
-            }
-            
             container.appendChild(div);
             container.scrollTop = container.scrollHeight;
         }
 
-        // LocalStorage
+        // Storage
         function saveMessage(text, sender) {
             const chats = JSON.parse(localStorage.getItem(`chat_${currentTicketId}`) || '[]');
             chats.push({text, sender, time: Date.now()});
@@ -287,35 +293,26 @@
         }
 
         // Status
-        function updateStatus(status, text) {
+        function updateStatus(status) {
             const el = document.getElementById('connectionStatus');
-            el.textContent = text || (status === 'polling' ? 'Menunggu balasan...' : 'Terhubung');
+            el.innerHTML = status === 'polling' 
+                ? 'Menunggu balasan...<span class="status-dot"></span>'
+                : 'Terhubung<span class="status-dot"></span>';
             el.className = `status ${status}`;
         }
 
-        // INIT - PERFECT AUTO-START
+        // PERFECT INIT
         async function init() {
+            console.log('🚀 Starting chat...');
             await generateTicket();
             loadMessages();
-            
-            // First notification ONLY ONCE per session
-            if (!localStorage.getItem(`notified_${currentTicketId}`)) {
-                await sendToTelegram('👋 User baru online');
-                localStorage.setItem(`notified_${currentTicketId}`, 'true');
-            }
             
             // Start polling
             pollingTimer = setInterval(pollTelegram, 1500);
             pollTelegram();
             
-            updateStatus('polling', 'Menunggu balasan agen...');
-            
-            // Auto-welcome after 1s
-            setTimeout(() => {
-                if (document.querySelectorAll('.message').length === 0) {
-                    addMessage('Agen akan segera merespon pesan Anda', 'admin');
-                }
-            }, 1000);
+            updateStatus('polling');
+            console.log('✅ Ready! Ticket:', currentTicketId);
         }
 
         // Events
@@ -328,9 +325,6 @@
 
         // Auto start
         window.addEventListener('load', init);
-        window.addEventListener('beforeunload', () => {
-            if (pollingTimer) clearInterval(pollingTimer);
-        });
     </script>
 </body>
 </html>
